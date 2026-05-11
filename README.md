@@ -1,1 +1,1 @@
-Simple payment notification system
+Simple Telegram reminder bot 
