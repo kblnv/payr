@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -30,10 +31,30 @@ func main() {
 
 	client := telegram.New(token)
 
-	err = client.SendMessage(chatId, "hello msg")
-	if err != nil {
-		log.Fatalf("send message failed: %v", err)
+	log.Println("starting payr server...")
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/event", func(w http.ResponseWriter, r *http.Request) {
+		err = client.SendMessage(chatId, "hello msg")
+
+		if err != nil {
+			log.Fatalf("send message failed: %v", err)
+		}
+
+		log.Println("message sent successfully")
+
+		w.Write([]byte("ok"))
+	})
+
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
 	}
 
-	log.Println("message sent successfully")
+	log.Println("listening on :8080...")
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatalf("server failed: %v", err)
+	}
 }
