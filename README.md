@@ -1,1 +1,1 @@
-Simple Telegram reminder bot 
+Simple notification engine

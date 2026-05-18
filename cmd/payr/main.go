@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"payrem/internal/telegram"
+	"payr/internal/telegram"
 )
 
 func main() {

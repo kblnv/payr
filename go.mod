@@ -1,3 +1,3 @@
-module payrem
+module payr
 
 go 1.26.3

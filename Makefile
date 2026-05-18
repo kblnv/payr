@@ -1,13 +1,14 @@
-PAYREM_PATH = ./cmd/payrem/main.go
-ENV_PATH = ./.env
+SRC = ./cmd/payr/main.go
+OUTPUT = ./build/payr
+ENV = ./.env
 
 .PHONY: build run clean
 
 build:
-	go build -o ./build/payrem $(PAYREM_PATH)
+	go build -o $(OUTPUT) $(SRC)
 
 run:
-	. $(ENV_PATH) && go run $(PAYREM_PATH)
+	. $(ENV) && go run $(SRC)
 
 clean:
 	rm ./build/*
