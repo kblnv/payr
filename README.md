@@ -1,1 +1,1 @@
-Simple notification engine
+Simple reminder system
