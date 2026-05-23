@@ -7,7 +7,7 @@ type Transport interface {
 
 type TransportsRegistry map[string]Transport
 
-var transportsRegistry = map[string]Transport{}
+var transportsRegistry = TransportsRegistry{}
 
 func Register(transport Transport) {
 	transportsRegistry[transport.Name()] = transport
