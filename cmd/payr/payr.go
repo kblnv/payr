@@ -9,6 +9,9 @@ import (
 	"payr/internal/domain"
 	"payr/internal/helpers"
 	"payr/internal/repository"
+	"payr/internal/plugins"
+
+	_ "payr/internal/plugins/export"
 )
 
 const (
@@ -16,8 +19,15 @@ const (
 	DEFAULT_SERVER_ADDRESS = "127.0.0.1:8080"
 )
 
-func handleEvent(_ *domain.Registry, _ domain.Event) (string, error) {
-	return "ok", nil
+func handleEvent(pluginsRegistry plugins.PluginsRegistry, event domain.Event) (string, error) {
+	if (event.Plugin.Type != "builtin" || event.Plugin.Name != "printer") {
+		helpers.Todo("plugins are in development")
+	}
+
+	plugin := pluginsRegistry[event.Plugin.Name]
+	result, err := plugin.Execute()
+
+	return result, err
 }
 
 type EventRequestBody struct {
@@ -25,6 +35,8 @@ type EventRequestBody struct {
 }
 
 func main() {
+	pluginsRegistry := plugins.GetPlugins()
+
 	cmd := cmd.New(cmd.Params{
 		ConfigPath:    DEFAULT_CONFIG_PATH,
 		ServerAddress: DEFAULT_SERVER_ADDRESS,
@@ -38,8 +50,6 @@ func main() {
 
 	registryDTO, err := repository.GetRegistry()
 	helpers.Die(err)
-
-	domain := domain.New()
 
 	registry, err := domain.MapRegistry(registryDTO)
 	helpers.Die(err)
@@ -60,7 +70,7 @@ func main() {
 
 		event := registry.Events[payload.Event]
 
-		result, err := handleEvent(registry, event)
+		result, err := handleEvent(pluginsRegistry, event)
 		helpers.Die(err)
 
 		w.Write([]byte(result))

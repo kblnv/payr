@@ -24,13 +24,7 @@ type Registry struct {
 	Transports map[string]Transport
 }
 
-type Domain struct{}
-
-func New() *Domain {
-	return &Domain{}
-}
-
-func (r *Domain) MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
+func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
 	registry := Registry{
 		Events:     make(map[string]Event, len(registryDTO.Events)),
 		Transports: make(map[string]Transport, len(registryDTO.Transports)),

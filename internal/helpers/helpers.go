@@ -9,3 +9,7 @@ func Die(err error) {
 		log.Fatalf("%v", err)
 	}
 }
+
+func Todo(msg string) {
+	panic(msg)
+}

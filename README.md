@@ -11,7 +11,7 @@ Example config file (config/registry.json):
       ],
       "plugin": {
         "type": "builtin",
-        "name": "text"
+        "name": "printer"
       }
     }
   ],

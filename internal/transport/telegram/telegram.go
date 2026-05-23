@@ -10,7 +10,8 @@ import (
 	"strconv"
 
 	"payr/internal/helpers"
-	"payr/internal/transport"
+	
+	_"payr/internal/transports"
 )
 
 type Telegram struct {
