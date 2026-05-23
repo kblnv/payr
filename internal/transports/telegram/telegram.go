@@ -10,8 +10,6 @@ import (
 	"strconv"
 
 	"payr/internal/helpers"
-	
-	_"payr/internal/transports"
 )
 
 type Telegram struct {
@@ -71,4 +69,8 @@ func (c *Telegram) Send(text string) error {
 	log.Printf("telegram response status=%v body=%v", resp.StatusCode, string(respBody))
 
 	return nil
+}
+
+func (c *Telegram) Name() string {
+	return "telegram"
 }

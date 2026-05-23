@@ -14,10 +14,10 @@ type PluginsRegistry map[string]Plugin
 
 var pluginsRegistry = PluginsRegistry{}
 
-func RegisterPlugin(plugin Plugin) {
+func Register(plugin Plugin) {
 	pluginsRegistry[plugin.Name()] = plugin
 }
 
-func GetPlugins() PluginsRegistry {
+func GetAll() PluginsRegistry {
 	return pluginsRegistry
 }
