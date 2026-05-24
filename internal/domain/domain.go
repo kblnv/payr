@@ -32,8 +32,8 @@ func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
 		registry.Events[e.Name] = Event{
 			Transports: e.Transports,
 			Plugin: Plugin{
-				Type: e.Plugin.Type,
-				Name: e.Plugin.Name,
+				Type:     e.Plugin.Type,
+				Name:     e.Plugin.Name,
 				Settings: e.Plugin.Settings,
 			},
 		}

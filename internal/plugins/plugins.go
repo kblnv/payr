@@ -1,8 +1,8 @@
 package plugins
 
 import (
-	"log"
 	"encoding/json"
+	"log"
 )
 
 const (

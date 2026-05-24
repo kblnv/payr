@@ -27,7 +27,7 @@ type EventRequestBody struct {
 }
 
 func handleEvent(event domain.Event) error {
-	if event.Plugin.Type != "builtin" || event.Plugin.Name != "printer" {
+	if event.Plugin.Type != "builtin" {
 		helpers.Todo("plugins are in development")
 	}
 
@@ -96,7 +96,7 @@ func main() {
 		err := json.NewDecoder(r.Body).Decode(&payload)
 		helpers.Die(err)
 
-		log.Printf("handling event...: %v", payload.Event)
+		log.Printf("handling event: %v...", payload.Event)
 		event := registry.Events[payload.Event]
 
 		err = handleEvent(event)
