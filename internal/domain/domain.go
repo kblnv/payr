@@ -1,17 +1,14 @@
 package domain
 
 import (
+	"encoding/json"
+
 	"payr/internal/repository"
 )
 
 type Plugin struct {
-	Type string
 	Name string
-}
-
-type Transport struct {
-	Sender    string
-	ChannelId string
+	Type string
 }
 
 type Event struct {
@@ -21,13 +18,13 @@ type Event struct {
 
 type Registry struct {
 	Events     map[string]Event
-	Transports map[string]Transport
+	Transports map[string]json.RawMessage
 }
 
 func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
 	registry := Registry{
 		Events:     make(map[string]Event, len(registryDTO.Events)),
-		Transports: make(map[string]Transport, len(registryDTO.Transports)),
+		Transports: make(map[string]json.RawMessage, len(registryDTO.Transports)),
 	}
 
 	for _, e := range registryDTO.Events {
@@ -41,10 +38,7 @@ func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
 	}
 
 	for _, t := range registryDTO.Transports {
-		registry.Transports[t.Name] = Transport{
-			Sender:    t.Sender,
-			ChannelId: t.ChannelId,
-		}
+		registry.Transports[t.Name] = t.Settings
 	}
 
 	return &registry, nil

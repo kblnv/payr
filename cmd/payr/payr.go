@@ -11,7 +11,7 @@ import (
 	"payr/internal/repository"
 
 	"payr/internal/transports"
-	"payr/internal/transports/telegram"
+	_ "payr/internal/transports/telegram"
 
 	"payr/internal/plugins"
 	"payr/internal/plugins/printer"
@@ -22,24 +22,24 @@ const (
 	DEFAULT_SERVER_ADDRESS = "127.0.0.1:8080"
 )
 
-func handleEvent(
-	transportsRegistry transports.TransportsRegistry,
-	pluginsRegistry plugins.PluginsRegistry,
-	event domain.Event,
-) error {
+type EventRequestBody struct {
+	Event string `json:"event"`
+}
+
+func handleEvent(event domain.Event) error {
 	if event.Plugin.Type != "builtin" || event.Plugin.Name != "printer" {
 		helpers.Todo("plugins are in development")
 	}
 
-	plugin := pluginsRegistry[event.Plugin.Name]
+	plugin := plugins.Get(event.Plugin.Name)
 	result, err := plugin.Execute()
 
 	if err != nil {
 		return err
 	}
 
-	for _, t := range event.Transports {
-		transport := transportsRegistry[t]
+	for _, name := range event.Transports {
+		transport := transports.Get(name)
 		err := transport.Send(result)
 
 		if err != nil {
@@ -48,10 +48,6 @@ func handleEvent(
 	}
 
 	return nil
-}
-
-type EventRequestBody struct {
-	Event string `json:"event"`
 }
 
 func main() {
@@ -74,11 +70,12 @@ func main() {
 
 	plugins.Register(printer.New())
 
-	telegramCreds := registry.Transports["telegram"]
-	transports.Register(telegram.New(telegramCreds.Sender, telegramCreds.ChannelId))
-
-	pluginsRegistry := plugins.GetAll()
-	transportsRegistry := transports.GetAll()
+	for name, config := range registry.Transports {
+		constructor := transports.GetConstructor(name)
+		transport := constructor(config)
+		
+		transports.Register(name, transport)
+	}
 
 	mux := http.NewServeMux()
 
@@ -96,7 +93,7 @@ func main() {
 
 		event := registry.Events[payload.Event]
 
-		err = handleEvent(transportsRegistry, pluginsRegistry, event)
+		err = handleEvent(event)
 		helpers.Die(err)
 
 		w.Write([]byte("ok"))
@@ -107,7 +104,7 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Println("server is running...")
+	log.Printf("server is listening on %v...", params.ServerAddress)
 
 	err = server.ListenAndServe()
 	helpers.Die(err)

@@ -10,18 +10,32 @@ import (
 	"strconv"
 
 	"payr/internal/helpers"
+	"payr/internal/transports"
 )
+
+type Config struct {
+	Sender    string `json:"sender"`
+	ChannelId string `json:"channel_id"`
+}
 
 type Telegram struct {
 	sender    string
 	channelId int64
 }
 
-func New(sender string, channelId string) *Telegram {
-	parsedChannelId, err := strconv.ParseInt(channelId, 10, 64)
+func New(rawConfig json.RawMessage) transports.Transport {
+	var config Config
+
+	err := json.Unmarshal(rawConfig, &config)
 	helpers.Die(err)
 
-	return &Telegram{sender: sender, channelId: parsedChannelId}
+	channelId, err := strconv.ParseInt(config.ChannelId, 10, 64)
+	helpers.Die(err)
+
+	return &Telegram{
+		sender: config.Sender,
+		channelId: channelId,
+	}
 }
 
 type sendMessageRequest struct {
@@ -71,6 +85,9 @@ func (c *Telegram) Send(text string) error {
 	return nil
 }
 
-func (c *Telegram) Name() string {
-	return "telegram"
+func init() {
+	transports.RegisterConstructor(
+		"telegram",
+		New,
+	)
 }

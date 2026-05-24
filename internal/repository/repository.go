@@ -6,14 +6,13 @@ import (
 )
 
 type Plugin struct {
-	Type string `json:"type"`
 	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
 type Transport struct {
-	Name      string `json:"name"`
-	Sender    string `json:"sender"`
-	ChannelId string `json:"channel_id"`
+	Name 		 string          `json:"name"`
+	Settings json.RawMessage `json:"settings"`
 }
 
 type Event struct {

@@ -10,14 +10,14 @@ type Plugin interface {
 	Execute() (string, error)
 }
 
-type PluginsRegistry map[string]Plugin
+type Registry map[string]Plugin
 
-var pluginsRegistry = PluginsRegistry{}
+var registry = Registry{}
 
 func Register(plugin Plugin) {
-	pluginsRegistry[plugin.Name()] = plugin
+	registry[plugin.Name()] = plugin
 }
 
-func GetAll() PluginsRegistry {
-	return pluginsRegistry
+func Get(name string) Plugin {
+	return registry[name]
 }

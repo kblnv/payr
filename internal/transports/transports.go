@@ -1,18 +1,41 @@
 package transports
 
+import (
+	"encoding/json"
+	"log"
+)
+
 type Transport interface {
-	Name() string
 	Send(text string) error
 }
 
-type TransportsRegistry map[string]Transport
+type Constructor func(rawConfig json.RawMessage) Transport
 
-var transportsRegistry = TransportsRegistry{}
+type Registry map[string]Transport
+type Constructors map[string]Constructor
 
-func Register(transport Transport) {
-	transportsRegistry[transport.Name()] = transport
+var (
+	registry     = Registry{}
+	constructors = Constructors{}
+)
+
+func Register(name string, transport Transport) {
+	log.Printf("registered transport: %v", name)
+	registry[name] = transport
 }
 
-func GetAll() TransportsRegistry {
-	return transportsRegistry
+func RegisterConstructor(
+	name string,
+	constructor Constructor,
+) {
+	log.Printf("registered transport contructor: %v", name)
+	constructors[name] = constructor
+}
+
+func Get(name string) Transport {
+	return registry[name]
+}
+
+func GetConstructor(name string) Constructor {
+	return constructors[name]
 }

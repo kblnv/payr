@@ -49,8 +49,10 @@ $ make build && ./build/payr --config <config_path>
   "transports": [
     {
       "name": "telegram",
-      "sender": "",
-      "channel_id": ""
+      "settings": {
+        "sender": "",
+        "channel_id": ""
+      }
     }
   ]
 }
