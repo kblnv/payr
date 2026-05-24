@@ -11,7 +11,7 @@ import (
 	"payr/internal/repository"
 
 	"payr/internal/transports"
-	_ "payr/internal/transports/telegram"
+	_ "payr/internal/transports/exports"
 
 	"payr/internal/plugins"
 	"payr/internal/plugins/printer"
@@ -91,6 +91,7 @@ func main() {
 		err := json.NewDecoder(r.Body).Decode(&payload)
 		helpers.Die(err)
 
+		log.Printf("handling event...: %v", payload.Event)
 		event := registry.Events[payload.Event]
 
 		err = handleEvent(event)
