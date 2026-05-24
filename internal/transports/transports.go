@@ -28,7 +28,7 @@ func RegisterConstructor(
 	name string,
 	constructor Constructor,
 ) {
-	log.Printf("registered transport contructor: %v", name)
+	log.Printf("registered transport constructor: %v", name)
 	constructors[name] = constructor
 }
 

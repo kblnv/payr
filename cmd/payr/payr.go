@@ -14,7 +14,7 @@ import (
 	_ "payr/internal/transports/exports"
 
 	"payr/internal/plugins"
-	"payr/internal/plugins/printer"
+	_ "payr/internal/plugins/exports"
 )
 
 const (
@@ -68,12 +68,17 @@ func main() {
 	registry, err := domain.MapRegistry(registryDTO)
 	helpers.Die(err)
 
-	plugins.Register(printer.New())
+	for _, event := range registry.Events {
+		constructor := plugins.GetConstructor(event.Plugin.Name)
+		plugin := constructor(event.Plugin.Settings)
+
+		plugins.Register(event.Plugin.Name, plugin)
+	}
 
 	for name, config := range registry.Transports {
 		constructor := transports.GetConstructor(name)
 		transport := constructor(config)
-		
+
 		transports.Register(name, transport)
 	}
 

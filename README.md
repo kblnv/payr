@@ -41,8 +41,11 @@ $ make build && ./build/payr --config <config_path>
         "telegram"
       ],
       "plugin": {
+        "name": "text",
         "type": "builtin",
-        "name": "printer"
+        "settings": {
+          "text": ""
+        }
       }
     }
   ],

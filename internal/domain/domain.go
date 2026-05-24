@@ -7,8 +7,9 @@ import (
 )
 
 type Plugin struct {
-	Name string
-	Type string
+	Name     string
+	Type     string
+	Settings json.RawMessage
 }
 
 type Event struct {
@@ -33,6 +34,7 @@ func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
 			Plugin: Plugin{
 				Type: e.Plugin.Type,
 				Name: e.Plugin.Name,
+				Settings: e.Plugin.Settings,
 			},
 		}
 	}

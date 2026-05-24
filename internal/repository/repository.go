@@ -6,12 +6,13 @@ import (
 )
 
 type Plugin struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name     string          `json:"name"`
+	Type 		 string          `json:"type"`
+	Settings json.RawMessage `json:"settings"`
 }
 
 type Transport struct {
-	Name 		 string          `json:"name"`
+	Name     string          `json:"name"`
 	Settings json.RawMessage `json:"settings"`
 }
 

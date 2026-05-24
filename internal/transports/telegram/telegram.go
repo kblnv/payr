@@ -33,7 +33,7 @@ func New(rawConfig json.RawMessage) transports.Transport {
 	helpers.Die(err)
 
 	return &Telegram{
-		sender: config.Sender,
+		sender:    config.Sender,
 		channelId: channelId,
 	}
 }
