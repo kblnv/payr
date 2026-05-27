@@ -22,7 +22,7 @@ type Registry struct {
 	Transports map[string]json.RawMessage
 }
 
-func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
+func MapRegistry(registryDTO *repository.Registry) *Registry {
 	registry := Registry{
 		Events:     make(map[string]Event, len(registryDTO.Events)),
 		Transports: make(map[string]json.RawMessage, len(registryDTO.Transports)),
@@ -43,5 +43,5 @@ func MapRegistry(registryDTO *repository.Registry) (*Registry, error) {
 		registry.Transports[t.Name] = t.Settings
 	}
 
-	return &registry, nil
+	return &registry
 }

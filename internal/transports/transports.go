@@ -14,15 +14,26 @@ type Constructor func(rawConfig json.RawMessage) Transport
 type Registry map[string]Transport
 type Constructors map[string]Constructor
 
-var (
-	registry     = Registry{}
-	constructors = Constructors{}
-)
-
-func Register(name string, transport Transport) {
-	log.Printf("registered transport: %v", name)
-	registry[name] = transport
+type Transports struct {
+	registry Registry
 }
+
+func (t *Transports) Register(name string, transport Transport) {
+	log.Printf("registered transport: %v", name)
+	t.registry[name] = transport
+}
+
+func (t *Transports) Get(name string) Transport {
+	return t.registry[name]
+}
+
+func New() *Transports {
+	return &Transports{
+		registry: Registry{},
+	}
+}
+
+var constructors = Constructors{}
 
 func RegisterConstructor(
 	name string,
@@ -30,10 +41,6 @@ func RegisterConstructor(
 ) {
 	log.Printf("registered transport constructor: %v", name)
 	constructors[name] = constructor
-}
-
-func Get(name string) Transport {
-	return registry[name]
 }
 
 func GetConstructor(name string) Constructor {

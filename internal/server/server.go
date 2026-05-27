@@ -1,24 +1,28 @@
 package server
 
 import (
-	"net/http"
-	"log"
 	"encoding/json"
+	"log"
+	"net/http"
 
-	"payr/internal/helpers"
 	"payr/internal/domain"
-	"payr/internal/transports"
+	"payr/internal/helpers"
 	"payr/internal/plugins"
+	"payr/internal/transports"
 )
 
 type Server struct {
-	server 	 *http.Server
-	registry *domain.Registry
+	server            *http.Server
+	registry          *domain.Registry
+	pluginsManager    *plugins.Plugins
+	transportsManager *transports.Transports
 }
 
 type Config struct {
-	Address  string
-	Registry *domain.Registry
+	Address           string
+	Registry          *domain.Registry
+	PluginsManager    *plugins.Plugins
+	TransportsManager *transports.Transports
 }
 
 type EventTriggerRequestBody struct {
@@ -33,7 +37,9 @@ func New(config Config) *Server {
 			Addr:    config.Address,
 			Handler: mux,
 		},
-		registry: config.Registry,
+		registry:          config.Registry,
+		pluginsManager:    config.PluginsManager,
+		transportsManager: config.TransportsManager,
 	}
 
 	mux.HandleFunc("/event", server.handleEventTrigger)
@@ -67,12 +73,12 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 		helpers.Todo("plugins are in development")
 	}
 
-	plugin := plugins.Get(event.Plugin.Name)
+	plugin := s.pluginsManager.Get(event.Plugin.Name)
 	result, err := plugin.Execute()
 	helpers.Die(err)
 
 	for _, name := range event.Transports {
-		transport := transports.Get(name)
+		transport := s.transportsManager.Get(name)
 		err := transport.Send(result)
 
 		helpers.Die(err)
@@ -80,4 +86,3 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte("ok"))
 }
-

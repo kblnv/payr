@@ -19,15 +19,26 @@ type Constructor func(rawConfig json.RawMessage) Plugin
 type Registry map[string]Plugin
 type Constructors map[string]Constructor
 
-var (
-	registry     = Registry{}
-	constructors = Constructors{}
-)
-
-func Register(name string, plugin Plugin) {
-	log.Printf("registered plugin: %v", name)
-	registry[name] = plugin
+type Plugins struct {
+	registry Registry
 }
+
+func (p *Plugins) Get(name string) Plugin {
+	return p.registry[name]
+}
+
+func (p *Plugins) Register(name string, plugin Plugin) {
+	log.Printf("registered plugin: %v", name)
+	p.registry[name] = plugin
+}
+
+func New() *Plugins {
+	return &Plugins{
+		registry: Registry{},
+	}
+}
+
+var constructors = Constructors{}
 
 func RegisterConstructor(
 	name string,
@@ -35,10 +46,6 @@ func RegisterConstructor(
 ) {
 	log.Printf("registered plugin constructor: %v", name)
 	constructors[name] = constructor
-}
-
-func Get(name string) Plugin {
-	return registry[name]
 }
 
 func GetConstructor(name string) Constructor {

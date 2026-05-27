@@ -3,7 +3,6 @@ package main
 import (
 	"payr/internal/cmd"
 	"payr/internal/domain"
-	"payr/internal/helpers"
 	"payr/internal/repository"
 	"payr/internal/server"
 
@@ -31,29 +30,31 @@ func main() {
 		Path: params.ConfigPath,
 	})
 
-	registryDTO, err := repository.GetRegistry()
-	helpers.Die(err)
+	registryDTO := repository.GetRegistry()
+	registry := domain.MapRegistry(registryDTO)
 
-	registry, err := domain.MapRegistry(registryDTO)
-	helpers.Die(err)
+	pluginsManager := plugins.New()
+	transportsManager := transports.New()
 
 	for _, event := range registry.Events {
 		constructor := plugins.GetConstructor(event.Plugin.Name)
 		plugin := constructor(event.Plugin.Settings)
 
-		plugins.Register(event.Plugin.Name, plugin)
+		pluginsManager.Register(event.Plugin.Name, plugin)
 	}
 
 	for name, config := range registry.Transports {
 		constructor := transports.GetConstructor(name)
 		transport := constructor(config)
 
-		transports.Register(name, transport)
+		transportsManager.Register(name, transport)
 	}
 
 	server := server.New(server.Config{
-		Address: params.ServerAddress,
-		Registry: registry,
+		Address:           params.ServerAddress,
+		Registry:          registry,
+		PluginsManager:    pluginsManager,
+		TransportsManager: transportsManager,
 	})
 
 	server.Start()

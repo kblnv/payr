@@ -3,6 +3,8 @@ package repository
 import (
 	"encoding/json"
 	"os"
+
+	"payr/internal/helpers"
 )
 
 type Plugin struct {
@@ -39,18 +41,14 @@ func New(settings Settings) *Repository {
 	return &Repository{settings: settings}
 }
 
-func (c *Repository) GetRegistry() (*Registry, error) {
+func (c *Repository) GetRegistry() *Registry {
 	bytes, err := os.ReadFile(c.settings.Path)
-
-	if err != nil {
-		return nil, err
-	}
+	helpers.Die(err)
 
 	var registry Registry
 
-	if err := json.Unmarshal(bytes, &registry); err != nil {
-		return nil, err
-	}
+	err = json.Unmarshal(bytes, &registry)
+	helpers.Die(err)
 
-	return &registry, nil
+	return &registry
 }
