@@ -7,6 +7,7 @@ import (
 type InParams struct {
 	ConfigPath    string
 	ServerAddress string
+	PluginsDir    string
 }
 
 type OutParams struct {
@@ -18,12 +19,14 @@ type OutParams struct {
 type Cmd struct {
 	defaultConfigPath    string
 	defaultServerAddress string
+	defaultPluginsDir    string
 }
 
 func New(defaultParams InParams) *Cmd {
 	return &Cmd{
 		defaultConfigPath:    defaultParams.ConfigPath,
 		defaultServerAddress: defaultParams.ServerAddress,
+		defaultPluginsDir:    defaultParams.PluginsDir,
 	}
 }
 
@@ -42,7 +45,7 @@ func (c *Cmd) Parse() OutParams {
 
 	pluginsDir := flag.String(
 		"plugins",
-		"",
+		c.defaultPluginsDir,
 		"plugins directory",
 	)
 

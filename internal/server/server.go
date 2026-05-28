@@ -7,21 +7,21 @@ import (
 
 	"payr/internal/domain"
 	"payr/internal/helpers"
-	"payr/internal/plugins"
 	"payr/internal/transports"
+	"payr/internal/plugins"
 )
 
 type Server struct {
 	server            *http.Server
 	registry          *domain.Registry
-	pluginsManager    *plugins.Plugins
+	pluginsManager    *plugins.Manager
 	transportsManager *transports.Transports
 }
 
 type Config struct {
 	Address           string
 	Registry          *domain.Registry
-	PluginsManager    *plugins.Plugins
+	PluginsManager    *plugins.Manager
 	TransportsManager *transports.Transports
 }
 

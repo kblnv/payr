@@ -1,54 +1,74 @@
 package plugins
 
 import (
-	"encoding/json"
 	"log"
+	"os"
+	"path/filepath"
+	"plugin"
+	"strings"
+	"encoding/json"
+
+	"payr/internal/helpers"
+	"payr/pkg/plugins"
 )
 
-const (
-	PluginBuiltin  = "builtin"
-	PluginExternal = "external"
-)
+type Registry map[string]plugins.Plugin
+type Constructors map[string]plugins.Constructor
 
-type Plugin interface {
-	Type() string
-	Execute() (string, error)
+type Manager struct {
+	registry     Registry
+	constructors Constructors
 }
 
-type Constructor func(rawConfig json.RawMessage) Plugin
-
-type Registry map[string]Plugin
-type Constructors map[string]Constructor
-
-type Plugins struct {
-	registry Registry
+func (m *Manager) Get(name string) plugins.Plugin {
+	return m.registry[name]
 }
 
-func (p *Plugins) Get(name string) Plugin {
-	return p.registry[name]
+func (m *Manager) GetConstructor(name string) plugins.Constructor {
+	return m.constructors[name]
 }
 
-func (p *Plugins) Register(name string, plugin Plugin) {
+func (m *Manager) Register(name string, plugin plugins.Plugin) {
 	log.Printf("registered plugin: %v", name)
-	p.registry[name] = plugin
+	m.registry[name] = plugin
 }
 
-func New() *Plugins {
-	return &Plugins{
-		registry: Registry{},
+func (m *Manager) RegisterConstructor(name string, constructor plugins.Constructor) {
+	log.Printf("registered constructor: %v", name)
+	m.constructors[name] = constructor
+}
+
+func (m *Manager) LoadAll(path string) {
+	files, err := os.ReadDir(path)
+	helpers.Die(err)
+
+	for _, file := range files {
+		fileName := file.Name()
+
+		if strings.HasSuffix(fileName, ".so") {
+			fullPath := filepath.Join(path, fileName)
+
+			_, err := plugin.Open(fullPath)
+
+			pluginPkg, err := plugin.Open(fullPath)
+			helpers.Die(err)
+
+			log.Println("load plugin:", fullPath)
+
+			pluginConstructorSym, err := pluginPkg.Lookup("New")
+			helpers.Die(err)
+
+			pluginConstructorFn, _ := pluginConstructorSym.(func (rawConfig json.RawMessage) plugins.Plugin)
+			pluginName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+
+			m.RegisterConstructor(pluginName, pluginConstructorFn)
+		}
 	}
 }
 
-var constructors = Constructors{}
-
-func RegisterConstructor(
-	name string,
-	constructor Constructor,
-) {
-	log.Printf("registered plugin constructor: %v", name)
-	constructors[name] = constructor
-}
-
-func GetConstructor(name string) Constructor {
-	return constructors[name]
+func New() *Manager {
+	return &Manager{
+		registry:     Registry{},
+		constructors: Constructors{},
+	}
 }

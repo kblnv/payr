@@ -1,10 +1,9 @@
-package text
+package main
 
 import (
 	"encoding/json"
 
-	"payr/internal/helpers"
-	"payr/internal/plugins"
+	"payr/pkg/plugins"
 )
 
 type Config struct {
@@ -19,7 +18,10 @@ func New(rawConfig json.RawMessage) plugins.Plugin {
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
-	helpers.Die(err)
+	
+	if (err != nil) {
+		panic(err)
+	}
 
 	return &Text{
 		text: config.Text,
@@ -32,11 +34,4 @@ func (t *Text) Type() string {
 
 func (t *Text) Execute() (string, error) {
 	return t.text, nil
-}
-
-func init() {
-	plugins.RegisterConstructor(
-		"text",
-		New,
-	)
 }
