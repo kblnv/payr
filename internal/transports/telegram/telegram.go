@@ -14,13 +14,13 @@ import (
 )
 
 type Config struct {
-	Sender    string `json:"sender"`
-	ChannelId string `json:"channel_id"`
+	BotToken string `json:"bot_token"`
+	ChatId   string `json:"chat_id"`
 }
 
 type Telegram struct {
-	sender    string
-	channelId int64
+	botToken string
+	chatId   int64
 }
 
 func New(rawConfig json.RawMessage) transports.Transport {
@@ -29,12 +29,12 @@ func New(rawConfig json.RawMessage) transports.Transport {
 	err := json.Unmarshal(rawConfig, &config)
 	helpers.Die(err)
 
-	channelId, err := strconv.ParseInt(config.ChannelId, 10, 64)
+	chatId, err := strconv.ParseInt(config.ChatId, 10, 64)
 	helpers.Die(err)
 
 	return &Telegram{
-		sender:    config.Sender,
-		channelId: channelId,
+		botToken: config.BotToken,
+		chatId:   chatId,
 	}
 }
 
@@ -46,11 +46,11 @@ type sendMessageRequest struct {
 func (c *Telegram) Send(text string) error {
 	url := fmt.Sprintf(
 		"https://api.telegram.org/bot%v/sendMessage",
-		c.sender,
+		c.botToken,
 	)
 
 	payload := sendMessageRequest{
-		ChatId: c.channelId,
+		ChatId: c.chatId,
 		Text:   text,
 	}
 
@@ -60,7 +60,7 @@ func (c *Telegram) Send(text string) error {
 		return err
 	}
 
-	log.Printf("sending message to id=%v", c.channelId)
+	log.Printf("sending message to id=%v", c.chatId)
 
 	resp, err := http.Post(
 		url,

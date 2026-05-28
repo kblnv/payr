@@ -14,9 +14,6 @@ All functionality is implemented using only the Go standard library.
 - **Scheduler**  
   A simple scheduler that allows configuring event execution time and recurrence.
 
-- **External Plugins**  
-  Support for third-party plugins without recompiling the core system, allowing plugins to be registered and used dynamically.
-
 - **More Transports**  
   Add additional transport implementations besides Telegram.
 
@@ -42,7 +39,6 @@ $ make build && ./build/payr --config <config_path>
       ],
       "plugin": {
         "name": "text",
-        "type": "builtin",
         "settings": {
           "text": ""
         }
@@ -53,8 +49,8 @@ $ make build && ./build/payr --config <config_path>
     {
       "name": "telegram",
       "settings": {
-        "sender": "",
-        "channel_id": ""
+        "bot_token": "",
+        "chat_id": ""
       }
     }
   ]

@@ -18,18 +18,14 @@ func New(rawConfig json.RawMessage) plugins.Plugin {
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
-	
-	if (err != nil) {
+
+	if err != nil {
 		panic(err)
 	}
 
 	return &Text{
 		text: config.Text,
 	}
-}
-
-func (t *Text) Type() string {
-	return plugins.PluginBuiltin
 }
 
 func (t *Text) Execute() (string, error) {

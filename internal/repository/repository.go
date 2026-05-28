@@ -9,7 +9,6 @@ import (
 
 type Plugin struct {
 	Name     string          `json:"name"`
-	Type     string          `json:"type"`
 	Settings json.RawMessage `json:"settings"`
 }
 

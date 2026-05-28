@@ -7,8 +7,8 @@ import (
 
 	"payr/internal/domain"
 	"payr/internal/helpers"
-	"payr/internal/transports"
 	"payr/internal/plugins"
+	"payr/internal/transports"
 )
 
 type Server struct {
@@ -68,10 +68,6 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("handling event: %v...", payload.Event)
 	event := s.registry.Events[payload.Event]
-
-	if event.Plugin.Type != "builtin" {
-		helpers.Todo("plugins are in development")
-	}
 
 	plugin := s.pluginsManager.Get(event.Plugin.Name)
 	result, err := plugin.Execute()

@@ -1,12 +1,12 @@
 package plugins
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
 	"plugin"
 	"strings"
-	"encoding/json"
 
 	"payr/internal/helpers"
 	"payr/pkg/plugins"
@@ -58,7 +58,7 @@ func (m *Manager) LoadAll(path string) {
 			pluginConstructorSym, err := pluginPkg.Lookup("New")
 			helpers.Die(err)
 
-			pluginConstructorFn, _ := pluginConstructorSym.(func (rawConfig json.RawMessage) plugins.Plugin)
+			pluginConstructorFn, _ := pluginConstructorSym.(func(rawConfig json.RawMessage) plugins.Plugin)
 			pluginName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
 
 			m.RegisterConstructor(pluginName, pluginConstructorFn)

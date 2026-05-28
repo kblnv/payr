@@ -39,10 +39,10 @@ func main() {
 	for _, event := range registry.Events {
 		constructor := pluginsManager.GetConstructor(event.Plugin.Name)
 		plugin := constructor(event.Plugin.Settings)
-		
+
 		pluginsManager.Register(event.Plugin.Name, plugin)
 	}
-	
+
 	transportsManager := transports.New()
 
 	for name, config := range registry.Transports {
