@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	PluginBuiltin = "builtin"
+	PluginBuiltin  = "builtin"
+	PluginExternal = "external"
 )
 
 type Plugin interface {

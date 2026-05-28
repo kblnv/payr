@@ -1,5 +1,5 @@
 package exports
 
 import (
-	_ "payr/internal/plugins/text"
+	_ "payr/internal/plugins/builtin/text"
 )

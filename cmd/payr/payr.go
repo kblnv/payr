@@ -1,8 +1,14 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+	"plugin"
+	"strings"
+
 	"payr/internal/cmd"
 	"payr/internal/domain"
+	"payr/internal/helpers"
 	"payr/internal/repository"
 	"payr/internal/server"
 
@@ -19,12 +25,28 @@ const (
 )
 
 func main() {
-	cmd := cmd.New(cmd.Params{
+	cmd := cmd.New(cmd.InParams{
 		ConfigPath:    DEFAULT_CONFIG_PATH,
 		ServerAddress: DEFAULT_SERVER_ADDRESS,
 	})
 
 	params := cmd.Parse()
+
+	if params.PluginsDir != "" {
+		files, err := os.ReadDir(params.PluginsDir)
+		helpers.Die(err)
+
+		for _, file := range files {
+			name := file.Name()
+
+			if strings.HasSuffix(name, ".so") {
+				fullPath := filepath.Join(params.PluginsDir, name)
+
+				_, err := plugin.Open(fullPath)
+				helpers.Die(err)
+			}
+		}
+	}
 
 	repository := repository.New(repository.Settings{
 		Path: params.ConfigPath,
