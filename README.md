@@ -1,13 +1,16 @@
 # Simple Notification / Reminder System
 
-A lightweight notification and reminder system built with a plugin-based architecture.
+A lightweight notification and reminder system built with a plugin-based architecture. Example plugin implementations can be found in the `plugins/` directory.
 
-The system processes incoming events through a plugin mechanism and then delivers them using a transport layer. The main design goal is to remain small, efficient in CPU/RAM usage, and easily extensible for future improvements.
+The system accepts HTTP requests on the `/event` endpoint. When an event is received, the system determines which plugin should handle it, passes necessary data to that plugin, and then delivers the generated notification using the configured transport layer.
+
+A plugin is a simple function that receives event data and plugin-specific configuration, and returns a notification message as a string. Plugins are loaded separately using Go's `plugin` package, allowing new functionality to be added without modifying the core application. Each plugin defines its own contract, including the structure of the event data it expects and the configuration parameters it requires.
+
+A transport is responsible for delivering the generated message to its destination (for example, Telegram).
 
 ## Tech Stack
 
-At the moment, the system is built without any external dependencies.  
-All functionality is implemented using only the Go standard library.
+At the moment, the system is built without any external dependencies. All functionality is implemented using only the Go standard library. The main design goal is to remain small, efficient in CPU/RAM usage, and easily extensible for future improvements. 
 
 ## Planned Improvements
 
@@ -21,10 +24,12 @@ All functionality is implemented using only the Go standard library.
 
 ### Build and Run
 
-Build the project using `make` and start the server with a configuration file.
+Build core and plugins using `make` and start the server with a configuration file.
 
 ```sh
-$ make build && ./build/payr --config <config_path>
+$ make build
+$ make build_plugins
+$ ./build/payr --config <config_path> --plugins <plugins_dir>
 ```
 
 ## Configuration Example
@@ -72,5 +77,3 @@ curl -X POST 127.0.0.1:8080/event \
   -H "Content-Type: application/json" \
   -d '{"event":"event 1"}'
 ```
-
-If the event exists in the configuration, it will be processed by the selected plugin and delivered through the configured transports.
