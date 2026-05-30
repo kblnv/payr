@@ -7,8 +7,10 @@ import (
 
 	"payr/internal/domain"
 	"payr/internal/helpers"
-	"payr/internal/plugins"
 	"payr/internal/transports"
+	"payr/internal/plugins"
+
+	api "payr/pkg/plugins"
 )
 
 type Server struct {
@@ -26,7 +28,8 @@ type Config struct {
 }
 
 type EventTriggerRequestBody struct {
-	Event string `json:"event"`
+	Event string          `json:"event"`
+	Meta  json.RawMessage `json:"meta"`
 }
 
 func New(config Config) *Server {
@@ -70,8 +73,15 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 	event := s.registry.Events[payload.Event]
 
 	plugin := s.pluginsManager.Get(event.Plugin.Name)
-	result, err := plugin.Execute()
+
+	ctx := api.Context{
+		EventMeta: payload.Meta,
+	}
+
+	result, err := plugin.Execute(&ctx)
 	helpers.Die(err)
+
+	log.Println("plugin result:", result)
 
 	for _, name := range event.Transports {
 		transport := s.transportsManager.Get(name)

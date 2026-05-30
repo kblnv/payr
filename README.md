@@ -38,14 +38,14 @@ $ ./build/payr --config <config_path> --plugins <plugins_dir>
 {
   "events": [
     {
-      "name": "event 1",
+      "name": "hello",
       "transports": [
         "telegram"
       ],
       "plugin": {
-        "name": "text",
+        "name": "template",
         "settings": {
-          "text": ""
+          "template": "Hello {{ .Name }}!"
         }
       }
     }
@@ -75,5 +75,5 @@ Send an HTTP request to trigger an event manually:
 ```sh
 curl -X POST 127.0.0.1:8080/event \
   -H "Content-Type: application/json" \
-  -d '{"event":"event 1"}'
+  -d '{"event":"hello", "meta": {"Name": "Guest"}}'
 ```
