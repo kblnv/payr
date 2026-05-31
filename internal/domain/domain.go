@@ -7,38 +7,56 @@ import (
 )
 
 type Plugin struct {
-	Name     string
+	Type     string
 	Settings json.RawMessage
 }
 
 type Event struct {
 	Transports []string
-	Plugin     Plugin
+	Plugin     string
 }
 
 type Registry struct {
 	Events     map[string]Event
 	Transports map[string]json.RawMessage
+	Plugins    map[string]Plugin
 }
 
-func MapRegistry(registryDTO *repository.Registry) *Registry {
+type GlobalSettings struct {
+	ServerAddress string
+	PluginsDir    string
+}
+
+func GetGlobalSettings(registryDTO *repository.Registry) *GlobalSettings {
+	return &GlobalSettings{
+		ServerAddress: registryDTO.Server.Address,
+		PluginsDir:    registryDTO.PluginsDir,
+	}
+}
+
+func GetRegistry(registryDTO *repository.Registry) *Registry {
 	registry := Registry{
 		Events:     make(map[string]Event, len(registryDTO.Events)),
 		Transports: make(map[string]json.RawMessage, len(registryDTO.Transports)),
+		Plugins:    make(map[string]Plugin, len(registryDTO.Plugins)),
 	}
 
 	for _, e := range registryDTO.Events {
 		registry.Events[e.Name] = Event{
 			Transports: e.Transports,
-			Plugin: Plugin{
-				Name:     e.Plugin.Name,
-				Settings: e.Plugin.Settings,
-			},
+			Plugin:     e.Plugin,
 		}
 	}
 
-	for _, t := range registryDTO.Transports {
-		registry.Transports[t.Name] = t.Settings
+	for key, t := range registryDTO.Transports {
+		registry.Transports[key] = t
+	}
+
+	for key, p := range registryDTO.Plugins {
+		registry.Plugins[key] = Plugin{
+			Type:     p.Type,
+			Settings: p.Settings,
+		}
 	}
 
 	return &registry

@@ -36,37 +36,37 @@ $ ./build/payr --config <config_path> --plugins <plugins_dir>
 
 ```json
 {
+  "server": {
+    "address": "127.0.0.1:8080"
+  },
+
+  "plugins_dir": "./build/plugins",
+
+  "plugins": {
+    "hello": {
+      "type": "template",
+      "settings": {
+        "template": "Hello, {{ .Name }}!"
+      }
+    }
+  },
+
+  "transports": {
+    "telegram": {
+      "bot_token": "<bot_token>",
+      "chat_id": "<chat_id>"
+    }
+  },
+
   "events": [
     {
       "name": "hello",
-      "transports": [
-        "telegram"
-      ],
-      "plugin": {
-        "name": "template",
-        "settings": {
-          "template": "Hello {{ .Name }}!"
-        }
-      }
-    }
-  ],
-  "transports": [
-    {
-      "name": "telegram",
-      "settings": {
-        "bot_token": "",
-        "chat_id": ""
-      }
+      "transports": ["telegram"],
+      "plugin": "hello"
     }
   ]
 }
 ```
-
-### Configuration Overview
-
-- `events` - list of available events
-- `transports` - delivery mechanisms used to send notifications
-- `plugin` - event processing logic
 
 ## Triggering an Event
 

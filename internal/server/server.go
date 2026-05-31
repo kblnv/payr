@@ -7,8 +7,8 @@ import (
 
 	"payr/internal/domain"
 	"payr/internal/helpers"
-	"payr/internal/transports"
 	"payr/internal/plugins"
+	"payr/internal/transports"
 
 	api "payr/pkg/plugins"
 )
@@ -72,7 +72,7 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 	log.Printf("handling event: %v...", payload.Event)
 	event := s.registry.Events[payload.Event]
 
-	plugin := s.pluginsManager.Get(event.Plugin.Name)
+	plugin := s.pluginsManager.Get(event.Plugin)
 
 	ctx := api.Context{
 		EventMeta: payload.Meta,

@@ -12,35 +12,33 @@ import (
 )
 
 const (
-	DEFAULT_CONFIG_PATH    = "./registry.json"
-	DEFAULT_SERVER_ADDRESS = "127.0.0.1:8080"
-	DEFAULT_PLUGINS_DIR    = "./plugins"
+	DEFAULT_CONFIG_PATH = "./registry.json"
 )
 
 func main() {
 	cmd := cmd.New(cmd.InParams{
-		ConfigPath:    DEFAULT_CONFIG_PATH,
-		ServerAddress: DEFAULT_SERVER_ADDRESS,
-		PluginsDir:    DEFAULT_PLUGINS_DIR,
+		ConfigPath: DEFAULT_CONFIG_PATH,
 	})
-
 	params := cmd.Parse()
-
-	pluginsManager := plugins.New()
-	pluginsManager.LoadAll(params.PluginsDir)
 
 	repository := repository.New(repository.Settings{
 		Path: params.ConfigPath,
 	})
+	config := repository.GetAll()
 
-	registryDTO := repository.GetRegistry()
-	registry := domain.MapRegistry(registryDTO)
+	registry := domain.GetRegistry(config)
+	globalSettings := domain.GetGlobalSettings(config)
+
+	pluginsManager := plugins.New()
+	pluginsManager.LoadAll(globalSettings.PluginsDir)
 
 	for _, event := range registry.Events {
-		constructor := pluginsManager.GetConstructor(event.Plugin.Name)
-		plugin := constructor(event.Plugin.Settings)
+		config := registry.Plugins[event.Plugin]
 
-		pluginsManager.Register(event.Plugin.Name, plugin)
+		constructor := pluginsManager.GetConstructor(config.Type)
+		instance := constructor(config.Settings)
+
+		pluginsManager.Register(event.Plugin, instance)
 	}
 
 	transportsManager := transports.New()
@@ -53,7 +51,7 @@ func main() {
 	}
 
 	server := server.New(server.Config{
-		Address:           params.ServerAddress,
+		Address:           globalSettings.ServerAddress,
 		Registry:          registry,
 		PluginsManager:    pluginsManager,
 		TransportsManager: transportsManager,

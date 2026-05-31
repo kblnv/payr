@@ -34,7 +34,7 @@ func (m *Manager) Register(name string, plugin plugins.Plugin) {
 }
 
 func (m *Manager) RegisterConstructor(name string, constructor plugins.Constructor) {
-	log.Printf("registered constructor: %v", name)
+	log.Printf("registered plugin constructor: %v", name)
 	m.constructors[name] = constructor
 }
 
@@ -45,24 +45,28 @@ func (m *Manager) LoadAll(path string) {
 	for _, file := range files {
 		fileName := file.Name()
 
-		if strings.HasSuffix(fileName, ".so") {
-			fullPath := filepath.Join(path, fileName)
-
-			_, err := plugin.Open(fullPath)
-
-			pluginPkg, err := plugin.Open(fullPath)
-			helpers.Die(err)
-
-			log.Println("load plugin:", fullPath)
-
-			pluginConstructorSym, err := pluginPkg.Lookup("New")
-			helpers.Die(err)
-
-			pluginConstructorFn, _ := pluginConstructorSym.(func(rawConfig json.RawMessage) plugins.Plugin)
-			pluginName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
-
-			m.RegisterConstructor(pluginName, pluginConstructorFn)
+		if !strings.HasSuffix(fileName, ".so") {
+			continue
 		}
+
+		fullPath := filepath.Join(path, fileName)
+
+		pkg, err := plugin.Open(fullPath)
+		helpers.Die(err)
+
+		log.Println("loaded plugin:", fullPath)
+
+		sym, err := pkg.Lookup("New")
+		helpers.Die(err)
+
+		constructor, ok := sym.(func(json.RawMessage) plugins.Plugin)
+		if !ok {
+			log.Fatalf("invalid plugin constructor in %s", fullPath)
+		}
+
+		name := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+
+		m.RegisterConstructor(name, constructor)
 	}
 }
 
