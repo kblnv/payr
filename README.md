@@ -27,9 +27,9 @@ At the moment, the system is built without any external dependencies. All functi
 Build core and plugins using `make` and start the server with a configuration file.
 
 ```sh
-$ make build
-$ make build_plugins
-$ ./build/payr --config <config_path> --plugins <plugins_dir>
+$ make core
+$ make plugins
+$ ./build/payr --config <config_path>
 ```
 
 ## Configuration Example
