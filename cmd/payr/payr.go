@@ -62,6 +62,5 @@ func main() {
 		TransportsManager: transportsManager,
 	})
 
-	log.Info("starting server...")
 	server.Start()
 }

@@ -7,7 +7,6 @@ import (
 	"plugin"
 	"strings"
 
-	"payr/internal/helpers"
 	"payr/internal/logger"
 	"payr/pkg/plugins"
 )
@@ -41,7 +40,9 @@ func (m *Manager) RegisterConstructor(name string, constructor plugins.Construct
 
 func (m *Manager) LoadAll(path string) {
 	files, err := os.ReadDir(path)
-	helpers.Must(err)
+	if err != nil {
+		m.log.Fatal("failed to read plugins directory: %v", err)
+	}
 
 	for _, file := range files {
 		fileName := file.Name()
@@ -53,12 +54,16 @@ func (m *Manager) LoadAll(path string) {
 		fullPath := filepath.Join(path, fileName)
 
 		pkg, err := plugin.Open(fullPath)
-		helpers.Must(err)
+		if err != nil {
+			m.log.Fatal("failed to open plugin: %v", err)
+		}
 
 		m.log.Debug("loaded plugin: %v", fullPath)
 
 		sym, err := pkg.Lookup("New")
-		helpers.Must(err)
+		if err != nil {
+			m.log.Fatal("failed to find plugin constructor: %v", err)
+		}
 
 		constructor, ok := sym.(func(json.RawMessage) plugins.Plugin)
 		if !ok {

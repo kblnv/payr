@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 
-	"payr/internal/helpers"
 	"payr/internal/logger"
 )
 
@@ -50,12 +49,16 @@ func New(config Config) *Repository {
 
 func (c *Repository) GetAll() *Registry {
 	bytes, err := os.ReadFile(c.path)
-	helpers.Must(err)
+	if err != nil {
+		c.log.Fatal("failed to read config file: %v", err)
+	}
 
 	var registry Registry
 
 	err = json.Unmarshal(bytes, &registry)
-	helpers.Must(err)
+	if err != nil {
+		c.log.Fatal("failed to parse config: %v", err)
+	}
 
 	return &registry
 }

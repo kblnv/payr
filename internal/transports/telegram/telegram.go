@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"payr/internal/helpers"
 	"payr/internal/logger"
 	"payr/internal/transports"
 )
@@ -30,10 +29,16 @@ func New(rawConfig json.RawMessage) transports.Transport {
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
-	helpers.Must(err)
+	if err != nil {
+		log.Error("failed to parse config: %v", err)
+		return nil
+	}
 
 	chatId, err := strconv.ParseInt(config.ChatId, 10, 64)
-	helpers.Must(err)
+	if err != nil {
+		log.Error("failed to parse chat_id: %v", err)
+		return nil
+	}
 
 	return &Telegram{
 		botToken: config.BotToken,
