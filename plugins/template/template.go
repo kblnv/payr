@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"text/template"
 
 	"payr/pkg/plugins"
@@ -16,22 +17,22 @@ type TemplatePlugin struct {
 	template *template.Template
 }
 
-func New(rawConfig json.RawMessage) plugins.Plugin {
+func New(rawConfig json.RawMessage) (plugins.Plugin, error) {
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
 
 	tmpl, err := template.New("message").Parse(config.Template)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	return &TemplatePlugin{
 		template: tmpl,
-	}
+	}, nil
 }
 
 func (t *TemplatePlugin) Execute(context *plugins.Context) (string, error) {

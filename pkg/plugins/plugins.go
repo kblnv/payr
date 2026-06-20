@@ -10,4 +10,4 @@ type Plugin interface {
 	Execute(context *Context) (string, error)
 }
 
-type Constructor func(rawConfig json.RawMessage) Plugin
+type Constructor func(rawConfig json.RawMessage) (Plugin, error)

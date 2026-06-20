@@ -10,7 +10,7 @@ type Transport interface {
 	Send(text string) error
 }
 
-type Constructor func(rawConfig json.RawMessage) Transport
+type Constructor func(rawConfig json.RawMessage) (Transport, error)
 
 type Registry map[string]Transport
 type Constructors map[string]Constructor

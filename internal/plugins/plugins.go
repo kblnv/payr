@@ -34,7 +34,6 @@ func (m *Manager) Register(name string, plugin plugins.Plugin) {
 }
 
 func (m *Manager) RegisterConstructor(name string, constructor plugins.Constructor) {
-	m.log.Info("registered plugin constructor: %v", name)
 	m.constructors[name] = constructor
 }
 
@@ -65,7 +64,7 @@ func (m *Manager) LoadAll(path string) {
 			m.log.Fatal("failed to find plugin constructor: %v", err)
 		}
 
-		constructor, ok := sym.(func(json.RawMessage) plugins.Plugin)
+		constructor, ok := sym.(func(json.RawMessage) (plugins.Plugin, error))
 		if !ok {
 			m.log.Fatal("invalid plugin constructor in %s", fullPath)
 		}

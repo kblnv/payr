@@ -23,28 +23,26 @@ type Telegram struct {
 	log      *logger.Logger
 }
 
-func New(rawConfig json.RawMessage) transports.Transport {
+func New(rawConfig json.RawMessage) (transports.Transport, error) {
 	log := logger.New()
 
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
 	if err != nil {
-		log.Error("failed to parse config: %v", err)
-		return nil
+		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
 
 	chatId, err := strconv.ParseInt(config.ChatId, 10, 64)
 	if err != nil {
-		log.Error("failed to parse chat_id: %v", err)
-		return nil
+		return nil, fmt.Errorf("failed to parse chat_id: %w", err)
 	}
 
 	return &Telegram{
 		botToken: config.BotToken,
 		chatId:   chatId,
 		log:      log,
-	}
+	}, nil
 }
 
 type sendMessageRequest struct {

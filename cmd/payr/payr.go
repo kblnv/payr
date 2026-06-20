@@ -40,7 +40,10 @@ func main() {
 		config := registry.Plugins[event.Plugin]
 
 		constructor := pluginsManager.GetConstructor(config.Type)
-		instance := constructor(config.Settings)
+		instance, err := constructor(config.Settings)
+		if err != nil {
+			log.Fatal("failed to create plugin %s: %v", event.Plugin, err)
+		}
 
 		pluginsManager.Register(event.Plugin, instance)
 	}
@@ -49,7 +52,10 @@ func main() {
 
 	for name, config := range registry.Transports {
 		constructor := transports.GetConstructor(name)
-		transport := constructor(config)
+		transport, err := constructor(config)
+		if err != nil {
+			log.Fatal("failed to create transport %s: %v", name, err)
+		}
 
 		transportsManager.Register(name, transport)
 	}
