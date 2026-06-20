@@ -1,15 +1,7 @@
 package helpers
 
-import (
-	"log"
-)
-
-func Die(err error) {
+func Must(err error) {
 	if err != nil {
-		log.Fatalf("%v", err)
+		panic(err)
 	}
-}
-
-func Todo(msg string) {
-	panic(msg)
 }

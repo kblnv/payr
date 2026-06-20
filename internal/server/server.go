@@ -2,11 +2,10 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"payr/internal/domain"
-	"payr/internal/helpers"
+	"payr/internal/logger"
 	"payr/internal/plugins"
 	"payr/internal/transports"
 
@@ -18,9 +17,11 @@ type Server struct {
 	registry          *domain.Registry
 	pluginsManager    *plugins.Manager
 	transportsManager *transports.Transports
+	log               *logger.Logger
 }
 
 type Config struct {
+	Logger            *logger.Logger
 	Address           string
 	Registry          *domain.Registry
 	PluginsManager    *plugins.Manager
@@ -43,6 +44,7 @@ func New(config Config) *Server {
 		registry:          config.Registry,
 		pluginsManager:    config.PluginsManager,
 		transportsManager: config.TransportsManager,
+		log:               config.Logger,
 	}
 
 	mux.HandleFunc("/event", server.handleEventTrigger)
@@ -51,10 +53,12 @@ func New(config Config) *Server {
 }
 
 func (s *Server) Start() {
-	log.Printf("server is listening on %v...", s.server.Addr)
+	s.log.Info("server is listening on %v", s.server.Addr)
 
 	err := s.server.ListenAndServe()
-	helpers.Die(err)
+	if err != nil {
+		s.log.Fatal("server error: %v", err)
+	}
 }
 
 func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
@@ -67,27 +71,55 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 
 	var payload EventTriggerRequestBody
 	err := json.NewDecoder(r.Body).Decode(&payload)
-	helpers.Die(err)
+	if err != nil {
+		s.log.Warn("failed to parse request body: %v", err)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
 
-	log.Printf("handling event: %v...", payload.Event)
-	event := s.registry.Events[payload.Event]
+	s.log.Info("handling event: %v", payload.Event)
+
+	event, ok := s.registry.Events[payload.Event]
+	if !ok {
+		s.log.Warn("event not found: %v", payload.Event)
+		http.Error(w, "event not found", http.StatusNotFound)
+		return
+	}
 
 	plugin := s.pluginsManager.Get(event.Plugin)
+	if plugin == nil {
+		s.log.Error("plugin not found: %v", event.Plugin)
+		http.Error(w, "plugin not found", http.StatusInternalServerError)
+		return
+	}
 
 	ctx := api.Context{
 		EventMeta: payload.Meta,
 	}
 
 	result, err := plugin.Execute(&ctx)
-	helpers.Die(err)
+	if err != nil {
+		s.log.Error("plugin execution failed: %v", err)
+		http.Error(w, "plugin execution failed", http.StatusInternalServerError)
+		return
+	}
 
-	log.Println("plugin result:", result)
+	s.log.Debug("plugin result: %v", result)
 
 	for _, name := range event.Transports {
 		transport := s.transportsManager.Get(name)
-		err := transport.Send(result)
+		if transport == nil {
+			s.log.Error("transport not found: %v", name)
+			http.Error(w, "transport not found", http.StatusInternalServerError)
+			return
+		}
 
-		helpers.Die(err)
+		err := transport.Send(result)
+		if err != nil {
+			s.log.Error("transport send failed: %v", err)
+			http.Error(w, "transport send failed", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	w.Write([]byte("ok"))

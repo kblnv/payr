@@ -2,13 +2,13 @@ package plugins
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"path/filepath"
 	"plugin"
 	"strings"
 
 	"payr/internal/helpers"
+	"payr/internal/logger"
 	"payr/pkg/plugins"
 )
 
@@ -18,6 +18,7 @@ type Constructors map[string]plugins.Constructor
 type Manager struct {
 	registry     Registry
 	constructors Constructors
+	log          *logger.Logger
 }
 
 func (m *Manager) Get(name string) plugins.Plugin {
@@ -29,18 +30,18 @@ func (m *Manager) GetConstructor(name string) plugins.Constructor {
 }
 
 func (m *Manager) Register(name string, plugin plugins.Plugin) {
-	log.Printf("registered plugin: %v", name)
+	m.log.Info("registered plugin: %v", name)
 	m.registry[name] = plugin
 }
 
 func (m *Manager) RegisterConstructor(name string, constructor plugins.Constructor) {
-	log.Printf("registered plugin constructor: %v", name)
+	m.log.Info("registered plugin constructor: %v", name)
 	m.constructors[name] = constructor
 }
 
 func (m *Manager) LoadAll(path string) {
 	files, err := os.ReadDir(path)
-	helpers.Die(err)
+	helpers.Must(err)
 
 	for _, file := range files {
 		fileName := file.Name()
@@ -52,16 +53,16 @@ func (m *Manager) LoadAll(path string) {
 		fullPath := filepath.Join(path, fileName)
 
 		pkg, err := plugin.Open(fullPath)
-		helpers.Die(err)
+		helpers.Must(err)
 
-		log.Println("loaded plugin:", fullPath)
+		m.log.Debug("loaded plugin: %v", fullPath)
 
 		sym, err := pkg.Lookup("New")
-		helpers.Die(err)
+		helpers.Must(err)
 
 		constructor, ok := sym.(func(json.RawMessage) plugins.Plugin)
 		if !ok {
-			log.Fatalf("invalid plugin constructor in %s", fullPath)
+			m.log.Fatal("invalid plugin constructor in %s", fullPath)
 		}
 
 		name := strings.TrimSuffix(fileName, filepath.Ext(fileName))
@@ -70,9 +71,10 @@ func (m *Manager) LoadAll(path string) {
 	}
 }
 
-func New() *Manager {
+func New(log *logger.Logger) *Manager {
 	return &Manager{
 		registry:     Registry{},
 		constructors: Constructors{},
+		log:          log,
 	}
 }

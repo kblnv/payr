@@ -3,6 +3,7 @@ package main
 import (
 	"payr/internal/cmd"
 	"payr/internal/domain"
+	"payr/internal/logger"
 	"payr/internal/plugins"
 	"payr/internal/repository"
 	"payr/internal/server"
@@ -16,20 +17,23 @@ const (
 )
 
 func main() {
+	log := logger.New()
+
 	cmd := cmd.New(cmd.InParams{
 		ConfigPath: DEFAULT_CONFIG_PATH,
 	})
 	params := cmd.Parse()
 
-	repository := repository.New(repository.Settings{
-		Path: params.ConfigPath,
+	repository := repository.New(repository.Config{
+		Path:   params.ConfigPath,
+		Logger: log,
 	})
 	config := repository.GetAll()
 
 	registry := domain.GetRegistry(config)
 	globalSettings := domain.GetGlobalSettings(config)
 
-	pluginsManager := plugins.New()
+	pluginsManager := plugins.New(log)
 	pluginsManager.LoadAll(globalSettings.PluginsDir)
 
 	for _, event := range registry.Events {
@@ -41,7 +45,7 @@ func main() {
 		pluginsManager.Register(event.Plugin, instance)
 	}
 
-	transportsManager := transports.New()
+	transportsManager := transports.New(log)
 
 	for name, config := range registry.Transports {
 		constructor := transports.GetConstructor(name)
@@ -51,11 +55,13 @@ func main() {
 	}
 
 	server := server.New(server.Config{
+		Logger:            log,
 		Address:           globalSettings.ServerAddress,
 		Registry:          registry,
 		PluginsManager:    pluginsManager,
 		TransportsManager: transportsManager,
 	})
 
+	log.Info("starting server...")
 	server.Start()
 }

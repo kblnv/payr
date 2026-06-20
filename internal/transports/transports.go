@@ -2,7 +2,8 @@ package transports
 
 import (
 	"encoding/json"
-	"log"
+
+	"payr/internal/logger"
 )
 
 type Transport interface {
@@ -16,10 +17,11 @@ type Constructors map[string]Constructor
 
 type Transports struct {
 	registry Registry
+	log      *logger.Logger
 }
 
 func (t *Transports) Register(name string, transport Transport) {
-	log.Printf("registered transport: %v", name)
+	t.log.Info("registered transport: %v", name)
 	t.registry[name] = transport
 }
 
@@ -27,9 +29,10 @@ func (t *Transports) Get(name string) Transport {
 	return t.registry[name]
 }
 
-func New() *Transports {
+func New(log *logger.Logger) *Transports {
 	return &Transports{
 		registry: Registry{},
+		log:      log,
 	}
 }
 
@@ -39,7 +42,6 @@ func RegisterConstructor(
 	name string,
 	constructor Constructor,
 ) {
-	log.Printf("registered transport constructor: %v", name)
 	constructors[name] = constructor
 }
 

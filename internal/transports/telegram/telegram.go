@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
 	"payr/internal/helpers"
+	"payr/internal/logger"
 	"payr/internal/transports"
 )
 
@@ -21,20 +21,24 @@ type Config struct {
 type Telegram struct {
 	botToken string
 	chatId   int64
+	log      *logger.Logger
 }
 
 func New(rawConfig json.RawMessage) transports.Transport {
+	log := logger.New()
+
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
-	helpers.Die(err)
+	helpers.Must(err)
 
 	chatId, err := strconv.ParseInt(config.ChatId, 10, 64)
-	helpers.Die(err)
+	helpers.Must(err)
 
 	return &Telegram{
 		botToken: config.BotToken,
 		chatId:   chatId,
+		log:      log,
 	}
 }
 
@@ -55,32 +59,36 @@ func (c *Telegram) Send(text string) error {
 	}
 
 	body, err := json.Marshal(payload)
-
 	if err != nil {
 		return err
 	}
 
-	log.Printf("sending message to id=%v", c.chatId)
+	c.log.Info("sending message to id=%v", c.chatId)
 
 	resp, err := http.Post(
 		url,
 		"application/json",
 		bytes.NewBuffer(body),
 	)
-
 	if err != nil {
+		c.log.Error("failed to send request: %v", err)
 		return err
 	}
 
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
-
 	if err != nil {
+		c.log.Error("failed to read response: %v", err)
 		return err
 	}
 
-	log.Printf("telegram response status=%v body=%v", resp.StatusCode, string(respBody))
+	c.log.Debug("telegram response status=%v body=%v", resp.StatusCode, string(respBody))
+
+	if resp.StatusCode != http.StatusOK {
+		c.log.Error("telegram API error: status=%v", resp.StatusCode)
+		return fmt.Errorf("telegram API error: status %v", resp.StatusCode)
+	}
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"payr/internal/helpers"
+	"payr/internal/logger"
 )
 
 type Plugin struct {
@@ -30,26 +31,31 @@ type Registry struct {
 	Events     []Event                    `json:"events"`
 }
 
-type Settings struct {
-	Path string
+type Config struct {
+	Path   string
+	Logger *logger.Logger
 }
 
 type Repository struct {
-	settings Settings
+	path string
+	log  *logger.Logger
 }
 
-func New(settings Settings) *Repository {
-	return &Repository{settings: settings}
+func New(config Config) *Repository {
+	return &Repository{
+		path: config.Path,
+		log:  config.Logger,
+	}
 }
 
 func (c *Repository) GetAll() *Registry {
-	bytes, err := os.ReadFile(c.settings.Path)
-	helpers.Die(err)
+	bytes, err := os.ReadFile(c.path)
+	helpers.Must(err)
 
 	var registry Registry
 
 	err = json.Unmarshal(bytes, &registry)
-	helpers.Die(err)
+	helpers.Must(err)
 
 	return &registry
 }
