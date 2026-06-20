@@ -9,7 +9,7 @@ import (
 	"payr/internal/server"
 	"payr/internal/transports"
 
-	_ "payr/internal/transports/exports"
+	"payr/internal/transports/telegram"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 func main() {
-	log := logger.New()
+	log := logger.New("main")
 
 	cmd := cmd.New(cmd.InParams{
 		ConfigPath: DEFAULT_CONFIG_PATH,
@@ -33,26 +33,27 @@ func main() {
 	registry := domain.GetRegistry(config)
 	globalSettings := domain.GetGlobalSettings(config)
 
-	pluginsManager := plugins.New(log)
+	pluginsManager := plugins.New(logger.New("plugins"))
 	pluginsManager.LoadAll(globalSettings.PluginsDir)
 
 	for _, event := range registry.Events {
-		config := registry.Plugins[event.Plugin]
+		config := registry.Handlers[event.Handler]
 
-		constructor := pluginsManager.GetConstructor(config.Type)
+		constructor := pluginsManager.GetConstructor(config.Plugin)
 		instance, err := constructor(config.Settings)
 		if err != nil {
-			log.Fatal("failed to create plugin %s: %v", event.Plugin, err)
+			log.Fatal("failed to create plugin %s: %v", event.Handler, err)
 		}
 
-		pluginsManager.Register(event.Plugin, instance)
+		pluginsManager.Register(event.Handler, instance)
 	}
 
-	transportsManager := transports.New(log)
+	transportsManager := transports.New(logger.New("transports"))
+	transportsManager.RegisterConstructor("telegram", telegram.New)
 
 	for name, config := range registry.Transports {
-		constructor := transports.GetConstructor(name)
-		transport, err := constructor(config)
+		constructor := transportsManager.GetConstructor(name)
+		transport, err := constructor(log, config)
 		if err != nil {
 			log.Fatal("failed to create transport %s: %v", name, err)
 		}
@@ -61,7 +62,7 @@ func main() {
 	}
 
 	server := server.New(server.Config{
-		Logger:            log,
+		Logger:            logger.New("server"),
 		Address:           globalSettings.ServerAddress,
 		Registry:          registry,
 		PluginsManager:    pluginsManager,

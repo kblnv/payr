@@ -42,9 +42,9 @@ $ ./build/payr --config <config_path>
 
   "plugins_dir": "./build/plugins",
 
-  "plugins": {
+  "handlers": {
     "hello": {
-      "type": "template",
+      "plugin": "template",
       "settings": {
         "template": "Hello, {{ .Name }}!"
       }
@@ -62,7 +62,7 @@ $ ./build/payr --config <config_path>
     {
       "name": "hello",
       "transports": ["telegram"],
-      "plugin": "hello"
+      "handler": "hello"
     }
   ]
 }

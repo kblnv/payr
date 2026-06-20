@@ -86,9 +86,9 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plugin := s.pluginsManager.Get(event.Plugin)
+	plugin := s.pluginsManager.Get(event.Handler)
 	if plugin == nil {
-		s.log.Error("plugin not found: %v", event.Plugin)
+		s.log.Error("plugin not found: %v", event.Handler)
 		http.Error(w, "plugin not found", http.StatusInternalServerError)
 		return
 	}

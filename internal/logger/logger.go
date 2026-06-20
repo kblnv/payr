@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 )
 
 type Level string
@@ -17,16 +16,17 @@ const (
 	FatalLevel Level = "FATAL"
 )
 
-type Logger struct{}
+type Logger struct {
+	pkg string
+}
 
-func New() *Logger {
-	return &Logger{}
+func New(pkg string) *Logger {
+	return &Logger{pkg: pkg}
 }
 
 func (l *Logger) log(level Level, format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	timestamp := time.Now().Format(time.RFC3339)
-	log.Printf("[%s] %s %s", level, timestamp, msg)
+	log.Printf("level=%-5s package=%-10s msg=%s", level, l.pkg, msg)
 }
 
 func (l *Logger) Debug(format string, args ...interface{}) {

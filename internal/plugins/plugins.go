@@ -29,7 +29,7 @@ func (m *Manager) GetConstructor(name string) plugins.Constructor {
 }
 
 func (m *Manager) Register(name string, plugin plugins.Plugin) {
-	m.log.Info("registered plugin: %v", name)
+	m.log.Info("registered handler: %v", name)
 	m.registry[name] = plugin
 }
 

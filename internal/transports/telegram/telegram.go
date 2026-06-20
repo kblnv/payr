@@ -23,9 +23,7 @@ type Telegram struct {
 	log      *logger.Logger
 }
 
-func New(rawConfig json.RawMessage) (transports.Transport, error) {
-	log := logger.New()
-
+func New(log *logger.Logger, rawConfig json.RawMessage) (transports.Transport, error) {
 	var config Config
 
 	err := json.Unmarshal(rawConfig, &config)
@@ -94,11 +92,4 @@ func (c *Telegram) Send(text string) error {
 	}
 
 	return nil
-}
-
-func init() {
-	transports.RegisterConstructor(
-		"telegram",
-		New,
-	)
 }

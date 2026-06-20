@@ -7,15 +7,15 @@ import (
 	"payr/internal/logger"
 )
 
-type Plugin struct {
-	Type     string          `json:"type"`
+type Handler struct {
+	Plugin   string          `json:"plugin"`
 	Settings json.RawMessage `json:"settings"`
 }
 
 type Event struct {
 	Name       string   `json:"name"`
 	Transports []string `json:"transports"`
-	Plugin     string   `json:"plugin"`
+	Handler    string   `json:"handler"`
 }
 
 type Server struct {
@@ -25,7 +25,7 @@ type Server struct {
 type Registry struct {
 	Server     Server                     `json:"server"`
 	PluginsDir string                     `json:"plugins_dir"`
-	Plugins    map[string]Plugin          `json:"plugins"`
+	Handlers   map[string]Handler         `json:"handlers"`
 	Transports map[string]json.RawMessage `json:"transports"`
 	Events     []Event                    `json:"events"`
 }
