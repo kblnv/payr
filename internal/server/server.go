@@ -104,6 +104,12 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if result == "" {
+		s.log.Debug("plugin result: <empty message>")
+		w.Write([]byte("ok"))
+		return
+	}
+
 	s.log.Debug("plugin result: %v", result)
 
 	for _, name := range event.Transports {

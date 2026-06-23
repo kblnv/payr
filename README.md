@@ -1,16 +1,16 @@
-# Simple Notification / Reminder System
+# Simple Notification System
 
-A lightweight notification and reminder system built with a plugin-based architecture. Example plugin implementations can be found in the `plugins/` directory.
+A lightweight notification system built with a plugin-based architecture. Example plugin implementations can be found in the `plugins/` directory.
 
 The system accepts HTTP requests on the `/event` endpoint. When an event is received, the system determines which plugin should handle it, passes necessary data to that plugin, and then delivers the generated notification using the configured transport layer.
 
-A plugin is a simple function that receives event data and plugin-specific configuration, and returns a notification message as a string. Plugins are loaded separately using Go's `plugin` package, allowing new functionality to be added without modifying the core application. Each plugin defines its own contract, including the structure of the event data it expects and the configuration parameters it requires.
+A plugin is a simple function that receives event data and plugin-specific configuration, and returns a notification message as a string. Plugins are loaded separately using Go's `plugin` package. Each plugin defines its own contract, including the structure of the event data it expects and the configuration parameters it requires.
 
 A transport is responsible for delivering the generated message to its destination (for example, Telegram).
 
 ## Tech Stack
 
-At the moment, the system is built without any external dependencies. All functionality is implemented using only the Go standard library. The main design goal is to remain small, efficient in CPU/RAM usage, and easily extensible for future improvements. 
+At the moment, the system is built without any external dependencies. The main design goal is to keep it simple.
 
 ## Planned Improvements
 
