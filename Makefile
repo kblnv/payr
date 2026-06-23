@@ -13,7 +13,7 @@ core:
 plugins:
 	@for dir in $(PLUGINS_SRC)/*/ ; do \
 		name=$$(basename $$dir); \
-		go build -buildmode=plugin -o $(PLUGINS_OUTPUT)/$$name.so $$dir; \
+		go build -buildmode=plugin -o $(PLUGINS_OUTPUT)/$$name/$$name.so $$dir; \
 	done
 
 clean:

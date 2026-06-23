@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"plugin"
-	"strings"
 
 	"payr/internal/logger"
 	"payr/pkg/plugins"
@@ -44,13 +43,13 @@ func (m *Manager) LoadAll(path string) {
 	}
 
 	for _, file := range files {
-		fileName := file.Name()
-
-		if !strings.HasSuffix(fileName, ".so") {
+		if !file.IsDir() {
 			continue
 		}
 
-		fullPath := filepath.Join(path, fileName)
+		name := file.Name()
+		lib := name + ".so"
+		fullPath := filepath.Join(path, name, lib)
 
 		pkg, err := plugin.Open(fullPath)
 		if err != nil {
@@ -68,8 +67,6 @@ func (m *Manager) LoadAll(path string) {
 		if !ok {
 			m.log.Fatal("invalid plugin constructor in %s", fullPath)
 		}
-
-		name := strings.TrimSuffix(fileName, filepath.Ext(fileName))
 
 		m.RegisterConstructor(name, constructor)
 	}
