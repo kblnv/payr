@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+  
 	"payr/internal/cmd"
 	"payr/internal/domain"
 	"payr/internal/logger"
@@ -74,7 +75,7 @@ func cmdInit() {
 }
 
 func cmdRun(configPath string) {
-	log := logger.New("main")
+	log := logger.New()
 
 	repository := repository.New(repository.Config{
 		Path:   configPath,
@@ -85,7 +86,7 @@ func cmdRun(configPath string) {
 	registry := domain.GetRegistry(config)
 	globalSettings := domain.GetGlobalSettings(config)
 
-	pluginsManager := plugins.New(logger.New("plugins"))
+	pluginsManager := plugins.New(logger.New().WithPackage("plugins"))
 	pluginsManager.LoadAll(globalSettings.PluginsDir)
 
 	for _, event := range registry.Events {
@@ -100,7 +101,7 @@ func cmdRun(configPath string) {
 		pluginsManager.Register(event.Handler, instance)
 	}
 
-	transportsManager := transports.New(logger.New("transports"))
+	transportsManager := transports.New(logger.New().WithPackage("transports"))
 	transportsManager.RegisterConstructor("telegram", telegram.New)
 
 	for name, cfg := range registry.Transports {
@@ -114,7 +115,7 @@ func cmdRun(configPath string) {
 	}
 
 	srv := server.New(server.Config{
-		Logger:            logger.New("server"),
+		Logger:            logger.New().WithPackage("server"),
 		Address:           globalSettings.ServerAddress,
 		Registry:          registry,
 		PluginsManager:    pluginsManager,

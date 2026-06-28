@@ -20,13 +20,22 @@ type Logger struct {
 	pkg string
 }
 
-func New(pkg string) *Logger {
-	return &Logger{pkg: pkg}
+func New() *Logger {
+	return &Logger{pkg: ""}
+}
+
+func (l *Logger) WithPackage(pkg string) *Logger {
+	l.pkg = pkg
+	return l
 }
 
 func (l *Logger) log(level Level, format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
-	log.Printf("level=%-5s package=%-10s msg=%s", level, l.pkg, msg)
+	if l.pkg == "" {
+		log.Printf("level=%-5s msg=%s", level, msg)
+	} else {
+		log.Printf("level=%-5s package=%-10s msg=%s", level, l.pkg, msg)
+	}
 }
 
 func (l *Logger) Debug(format string, args ...interface{}) {
