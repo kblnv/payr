@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"payr/internal/cmd"
 	"payr/internal/domain"
 	"payr/internal/logger"
@@ -23,6 +25,11 @@ func main() {
 		ConfigPath: DEFAULT_CONFIG_PATH,
 	})
 	params := cmd.Parse()
+
+	if params.Init {
+		runInit(params.ConfigPath)
+		return
+	}
 
 	repository := repository.New(repository.Config{
 		Path:   params.ConfigPath,
@@ -70,4 +77,45 @@ func main() {
 	})
 
 	server.Start()
+}
+
+func runInit(configPath string) {
+	config := `{
+    "server": {
+      "address": "127.0.0.1:8080"
+    },
+
+    "plugins_dir": "./plugins",
+
+    "handlers": {
+      "healthcheck": {
+        "plugin": "template",
+        "settings": {
+          "template": "healthcheck"
+        }
+      }
+    },
+
+    "transports": {
+      "telegram": {
+        "bot_token": "<bot_token>",
+        "chat_id": "<chat_id>"
+      }
+    },
+
+    "events": [
+      {
+        "name": "healthcheck",
+        "transports": ["telegram"],
+        "handler": "healthcheck"
+      }
+    ]
+  }`
+
+	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to create config: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Ready! Run: ./payr")
 }

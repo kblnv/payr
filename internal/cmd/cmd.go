@@ -10,6 +10,7 @@ type InParams struct {
 
 type OutParams struct {
 	ConfigPath string
+	Init       bool
 }
 
 type Cmd struct {
@@ -28,9 +29,15 @@ func (c *Cmd) Parse() OutParams {
 		c.defaultConfigPath,
 		"config path",
 	)
+	init := flag.Bool(
+		"init",
+		false,
+		"initialize new config",
+	)
 	flag.Parse()
 
 	return OutParams{
 		ConfigPath: *configPath,
+		Init:       *init,
 	}
 }

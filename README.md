@@ -29,7 +29,9 @@ Build core and plugins using `make` and start the server with a configuration fi
 ```sh
 $ make core
 $ make plugins
-$ ./build/payr --config <config_path>
+$ cd build
+$ ./payr --init
+$ ./payr
 ```
 
 ## Configuration Example
