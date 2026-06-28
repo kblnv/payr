@@ -19,67 +19,20 @@ const (
 )
 
 func main() {
-	log := logger.New("main")
-
 	cmd := cmd.New(cmd.InParams{
 		ConfigPath: DEFAULT_CONFIG_PATH,
 	})
 	params := cmd.Parse()
 
-	if params.Init {
-		runInit(params.ConfigPath)
-		return
+	switch params.Command {
+	case "init":
+		cmdInit()
+	case "run":
+		cmdRun(params.ConfigPath)
 	}
-
-	repository := repository.New(repository.Config{
-		Path:   params.ConfigPath,
-		Logger: log,
-	})
-	config := repository.GetAll()
-
-	registry := domain.GetRegistry(config)
-	globalSettings := domain.GetGlobalSettings(config)
-
-	pluginsManager := plugins.New(logger.New("plugins"))
-	pluginsManager.LoadAll(globalSettings.PluginsDir)
-
-	for _, event := range registry.Events {
-		config := registry.Handlers[event.Handler]
-
-		constructor := pluginsManager.GetConstructor(config.Plugin)
-		instance, err := constructor(config.Settings)
-		if err != nil {
-			log.Fatal("failed to create plugin %s: %v", event.Handler, err)
-		}
-
-		pluginsManager.Register(event.Handler, instance)
-	}
-
-	transportsManager := transports.New(logger.New("transports"))
-	transportsManager.RegisterConstructor("telegram", telegram.New)
-
-	for name, config := range registry.Transports {
-		constructor := transportsManager.GetConstructor(name)
-		transport, err := constructor(log, config)
-		if err != nil {
-			log.Fatal("failed to create transport %s: %v", name, err)
-		}
-
-		transportsManager.Register(name, transport)
-	}
-
-	server := server.New(server.Config{
-		Logger:            logger.New("server"),
-		Address:           globalSettings.ServerAddress,
-		Registry:          registry,
-		PluginsManager:    pluginsManager,
-		TransportsManager: transportsManager,
-	})
-
-	server.Start()
 }
 
-func runInit(configPath string) {
+func cmdInit() {
 	config := `{
     "server": {
       "address": "127.0.0.1:8080"
@@ -112,10 +65,61 @@ func runInit(configPath string) {
     ]
   }`
 
-	if err := os.WriteFile(configPath, []byte(config), 0644); err != nil {
+	if err := os.WriteFile(DEFAULT_CONFIG_PATH, []byte(config), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create config: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Ready! Run: ./payr")
+	fmt.Println("Ready! Run: ./payr run")
+}
+
+func cmdRun(configPath string) {
+	log := logger.New("main")
+
+	repository := repository.New(repository.Config{
+		Path:   configPath,
+		Logger: log,
+	})
+	config := repository.GetAll()
+
+	registry := domain.GetRegistry(config)
+	globalSettings := domain.GetGlobalSettings(config)
+
+	pluginsManager := plugins.New(logger.New("plugins"))
+	pluginsManager.LoadAll(globalSettings.PluginsDir)
+
+	for _, event := range registry.Events {
+		cfg := registry.Handlers[event.Handler]
+
+		constructor := pluginsManager.GetConstructor(cfg.Plugin)
+		instance, err := constructor(cfg.Settings)
+		if err != nil {
+			log.Fatal("failed to create plugin %s: %v", event.Handler, err)
+		}
+
+		pluginsManager.Register(event.Handler, instance)
+	}
+
+	transportsManager := transports.New(logger.New("transports"))
+	transportsManager.RegisterConstructor("telegram", telegram.New)
+
+	for name, cfg := range registry.Transports {
+		constructor := transportsManager.GetConstructor(name)
+		transport, err := constructor(log, cfg)
+		if err != nil {
+			log.Fatal("failed to create transport %s: %v", name, err)
+		}
+
+		transportsManager.Register(name, transport)
+	}
+
+	srv := server.New(server.Config{
+		Logger:            logger.New("server"),
+		Address:           globalSettings.ServerAddress,
+		Registry:          registry,
+		PluginsManager:    pluginsManager,
+		TransportsManager: transportsManager,
+	})
+
+	srv.Start()
 }

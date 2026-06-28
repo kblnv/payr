@@ -24,14 +24,14 @@ At the moment, the system is built without any external dependencies. The main d
 
 ### Build and Run
 
-Build core and plugins using `make` and start the server with a configuration file.
+Build core and plugins using `make`, then initialize config and run the server.
 
 ```sh
 $ make core
 $ make plugins
 $ cd build
-$ ./payr --init
-$ ./payr
+$ ./payr init
+$ ./payr run
 ```
 
 ## Configuration Example
