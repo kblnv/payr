@@ -22,8 +22,6 @@ At the moment, the system is built without any external dependencies. The main d
 
 ## How to Use
 
-### Build and Run
-
 Build core and plugins using `make`, then initialize config and run the server.
 
 ```sh
@@ -34,42 +32,6 @@ $ ./payr init
 $ ./payr run
 ```
 
-## Configuration Example
-
-```json
-{
-  "server": {
-    "address": "127.0.0.1:8080"
-  },
-
-  "plugins_dir": "./build/plugins",
-
-  "handlers": {
-    "hello": {
-      "plugin": "template",
-      "settings": {
-        "template": "Hello, {{ .Name }}!"
-      }
-    }
-  },
-
-  "transports": {
-    "telegram": {
-      "bot_token": "<bot_token>",
-      "chat_id": "<chat_id>"
-    }
-  },
-
-  "events": [
-    {
-      "name": "hello",
-      "transports": ["telegram"],
-      "handler": "hello"
-    }
-  ]
-}
-```
-
 ## Triggering an Event
 
 Send an HTTP request to trigger an event manually:
@@ -77,5 +39,7 @@ Send an HTTP request to trigger an event manually:
 ```sh
 curl -X POST 127.0.0.1:8080/event \
   -H "Content-Type: application/json" \
-  -d '{"event":"hello", "meta": {"Name": "Guest"}}'
+  -d '{"event":"hello"}'
 ```
+
+To pass data to the plugin, use the `meta` field.
