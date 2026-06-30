@@ -29,9 +29,15 @@ type Config struct {
 	TransportsManager *transports.Transports
 }
 
+type RequestTransport struct {
+	Transport string `json:"name"`
+	To        string `json:"to"`
+}
+
 type EventTriggerRequestBody struct {
-	Event string          `json:"event"`
-	Meta  json.RawMessage `json:"meta"`
+	Event      string             `json:"event"`
+	Meta       json.RawMessage    `json:"meta"`
+	Transports []RequestTransport `json:"transports"`
 }
 
 func New(config Config) *Server {
@@ -120,15 +126,21 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 
 	s.log.Debug("plugin result: %v", result)
 
-	for _, name := range event.Transports {
-		transport := s.transportsManager.Get(name)
+	if len(payload.Transports) == 0 {
+		s.log.Warn("no transports specified in request")
+		http.Error(w, "no transports specified in request", http.StatusInternalServerError)
+		return
+	}
+
+	for _, trigger := range payload.Transports {
+		transport := s.transportsManager.Get(trigger.Transport)
 		if transport == nil {
-			s.log.Error("transport not found: %v", name)
+			s.log.Error("transport not found: %v", trigger.Transport)
 			http.Error(w, "transport not found", http.StatusInternalServerError)
 			return
 		}
 
-		err := transport.Send(result)
+		err := transport.Send(result, trigger.To)
 		if err != nil {
 			s.log.Error("transport send failed: %v", err)
 			http.Error(w, "transport send failed", http.StatusInternalServerError)

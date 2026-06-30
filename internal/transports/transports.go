@@ -7,7 +7,7 @@ import (
 )
 
 type Transport interface {
-	Send(text string) error
+	Send(text string, to string) error
 }
 
 type Constructor func(log *logger.Logger, rawConfig json.RawMessage) (Transport, error)

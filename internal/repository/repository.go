@@ -13,9 +13,8 @@ type Handler struct {
 }
 
 type Event struct {
-	Name       string   `json:"name"`
-	Transports []string `json:"transports"`
-	Handler    Handler  `json:"handler"`
+	Name    string  `json:"name"`
+	Handler Handler `json:"handler"`
 }
 
 type Server struct {

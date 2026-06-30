@@ -14,12 +14,10 @@ import (
 
 type Config struct {
 	BotToken string `json:"bot_token"`
-	ChatId   string `json:"chat_id"`
 }
 
 type Telegram struct {
 	botToken string
-	chatId   int64
 	log      *logger.Logger
 }
 
@@ -31,14 +29,8 @@ func New(log *logger.Logger, rawConfig json.RawMessage) (transports.Transport, e
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
 
-	chatId, err := strconv.ParseInt(config.ChatId, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse chat_id: %w", err)
-	}
-
 	return &Telegram{
 		botToken: config.BotToken,
-		chatId:   chatId,
 		log:      log,
 	}, nil
 }
@@ -48,14 +40,19 @@ type sendMessageRequest struct {
 	Text   string `json:"text"`
 }
 
-func (c *Telegram) Send(text string) error {
+func (c *Telegram) Send(text string, to string) error {
+	chatId, err := strconv.ParseInt(to, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse chat_id: %w", err)
+	}
+
 	url := fmt.Sprintf(
 		"https://api.telegram.org/bot%v/sendMessage",
 		c.botToken,
 	)
 
 	payload := sendMessageRequest{
-		ChatId: c.chatId,
+		ChatId: chatId,
 		Text:   text,
 	}
 
@@ -64,7 +61,7 @@ func (c *Telegram) Send(text string) error {
 		return err
 	}
 
-	c.log.Info("sending message to id=%v", c.chatId)
+	c.log.Info("sending message to id=%v", chatId)
 
 	resp, err := http.Post(
 		url,

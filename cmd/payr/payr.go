@@ -44,14 +44,12 @@ func cmdInit() {
 
   "transports": {
     "telegram": {
-      "bot_token": "<bot_token>",
-      "chat_id": "<chat_id>"
+      "bot_token": "<bot_token>"
     }
   },
 
   "events": {
     "hello": {
-      "transports": ["telegram"],
       "handler": {
         "plugin": "template",
         "settings": {

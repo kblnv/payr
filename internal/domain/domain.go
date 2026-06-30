@@ -7,10 +7,9 @@ import (
 )
 
 type Event struct {
-	Name       string
-	Transports []string
-	Plugin     string
-	Settings   json.RawMessage
+	Name     string
+	Plugin   string
+	Settings json.RawMessage
 }
 
 type Registry struct {
@@ -40,10 +39,9 @@ func GetRegistry(registryDTO *repository.Registry) *Registry {
 
 	for name, e := range registryDTO.Events {
 		registry.Events[name] = Event{
-			Name:       e.Name,
-			Transports: e.Transports,
-			Plugin:     e.Handler.Plugin,
-			Settings:   e.Handler.Settings,
+			Name:     e.Name,
+			Plugin:   e.Handler.Plugin,
+			Settings: e.Handler.Settings,
 		}
 	}
 
