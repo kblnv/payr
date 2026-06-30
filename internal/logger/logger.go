@@ -34,7 +34,7 @@ func (l *Logger) log(level Level, format string, args ...interface{}) {
 	if l.pkg == "" {
 		log.Printf("level=%-5s msg=%s", level, msg)
 	} else {
-		log.Printf("level=%-5s package=%-10s msg=%s", level, l.pkg, msg)
+		log.Printf("level=%s package=%s msg=%s", level, l.pkg, msg)
 	}
 }
 

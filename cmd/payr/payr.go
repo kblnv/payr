@@ -42,10 +42,10 @@ func cmdInit() {
     "plugins_dir": "./plugins",
 
     "handlers": {
-      "healthcheck": {
+      "hello": {
         "plugin": "template",
         "settings": {
-          "template": "healthcheck"
+          "template": "Hello, {{ .Name }}!"
         }
       }
     },
@@ -59,9 +59,9 @@ func cmdInit() {
 
     "events": [
       {
-        "name": "healthcheck",
+        "name": "hello",
         "transports": ["telegram"],
-        "handler": "healthcheck"
+        "handler": "hello"
       }
     ]
   }`

@@ -22,6 +22,7 @@ At the moment, the system is built without any external dependencies. The main d
 
 ## How to Use
 
+### Build and Run
 Build core and plugins using `make`, then initialize config and run the server.
 
 ```sh
@@ -32,14 +33,12 @@ $ ./payr init
 $ ./payr run
 ```
 
-## Triggering an Event
+### Triggering an Event
 
 Send an HTTP request to trigger an event manually:
 
 ```sh
 curl -X POST 127.0.0.1:8080/event \
   -H "Content-Type: application/json" \
-  -d '{"event":"hello"}'
+  -d '{"event":"hello", "meta": {"Name": "Guest"}}'
 ```
-
-To pass data to the plugin, use the `meta` field.
