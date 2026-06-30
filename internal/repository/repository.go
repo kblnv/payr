@@ -7,14 +7,10 @@ import (
 	"payr/internal/logger"
 )
 
-type Handler struct {
+type Event struct {
+	Name     string          `json:"name"`
 	Plugin   string          `json:"plugin"`
 	Settings json.RawMessage `json:"settings"`
-}
-
-type Event struct {
-	Name    string  `json:"name"`
-	Handler Handler `json:"handler"`
 }
 
 type Server struct {

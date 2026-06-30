@@ -50,11 +50,9 @@ func cmdInit() {
 
   "events": {
     "hello": {
-      "handler": {
-        "plugin": "template",
-        "settings": {
-          "template": "Hello, {{ .Name }}!"
-        }
+      "plugin": "template",
+      "settings": {
+        "template": "Hello, {{ .Name }}!"
       }
     }
   }

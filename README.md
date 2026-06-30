@@ -40,5 +40,5 @@ Send an HTTP request to trigger an event manually:
 ```sh
 curl -X POST 127.0.0.1:8080/event \
   -H "Content-Type: application/json" \
-  -d '{"event":"hello", "meta": {"Name": "Guest"}}'
+  -d '{"event": "hello", "transports": [{"transport": "telegram", "to": "<chat_id>"}], "meta": {"Name": "Guest"}}'
 ```

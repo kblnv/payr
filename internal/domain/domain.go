@@ -40,8 +40,8 @@ func GetRegistry(registryDTO *repository.Registry) *Registry {
 	for name, e := range registryDTO.Events {
 		registry.Events[name] = Event{
 			Name:     e.Name,
-			Plugin:   e.Handler.Plugin,
-			Settings: e.Handler.Settings,
+			Plugin:   e.Plugin,
+			Settings: e.Settings,
 		}
 	}
 
