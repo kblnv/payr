@@ -6,33 +6,29 @@ import (
 	"payr/internal/repository"
 )
 
-type Handler struct {
-	Plugin   string
-	Settings json.RawMessage
-}
-
 type Event struct {
+	Name       string
 	Transports []string
-	Handler    string
+	Plugin     string
+	Settings   json.RawMessage
 }
 
 type Registry struct {
 	Events     map[string]Event
 	Transports map[string]json.RawMessage
-	Handlers   map[string]Handler
 }
 
 type GlobalSettings struct {
-	Host       string
-	Port       string
-	PluginsDir string
+	Host    string
+	Port    string
+	Plugins string
 }
 
 func GetGlobalSettings(registryDTO *repository.Registry) *GlobalSettings {
 	return &GlobalSettings{
-		Host:       registryDTO.Server.Host,
-		Port:       registryDTO.Server.Port,
-		PluginsDir: registryDTO.PluginsDir,
+		Host:    registryDTO.Server.Host,
+		Port:    registryDTO.Server.Port,
+		Plugins: registryDTO.Plugins,
 	}
 }
 
@@ -40,25 +36,19 @@ func GetRegistry(registryDTO *repository.Registry) *Registry {
 	registry := Registry{
 		Events:     make(map[string]Event, len(registryDTO.Events)),
 		Transports: make(map[string]json.RawMessage, len(registryDTO.Transports)),
-		Handlers:   make(map[string]Handler, len(registryDTO.Handlers)),
 	}
 
-	for _, e := range registryDTO.Events {
-		registry.Events[e.Name] = Event{
+	for name, e := range registryDTO.Events {
+		registry.Events[name] = Event{
+			Name:       e.Name,
 			Transports: e.Transports,
-			Handler:    e.Handler,
+			Plugin:     e.Handler.Plugin,
+			Settings:   e.Handler.Settings,
 		}
 	}
 
 	for key, t := range registryDTO.Transports {
 		registry.Transports[key] = t
-	}
-
-	for key, p := range registryDTO.Handlers {
-		registry.Handlers[key] = Handler{
-			Plugin:   p.Plugin,
-			Settings: p.Settings,
-		}
 	}
 
 	return &registry

@@ -15,7 +15,7 @@ type Handler struct {
 type Event struct {
 	Name       string   `json:"name"`
 	Transports []string `json:"transports"`
-	Handler    string   `json:"handler"`
+	Handler    Handler  `json:"handler"`
 }
 
 type Server struct {
@@ -25,10 +25,9 @@ type Server struct {
 
 type Registry struct {
 	Server     Server                     `json:"server"`
-	PluginsDir string                     `json:"plugins"`
-	Handlers   map[string]Handler         `json:"handlers"`
+	Plugins    string                     `json:"plugins"`
 	Transports map[string]json.RawMessage `json:"transports"`
-	Events     []Event                    `json:"events"`
+	Events     map[string]Event           `json:"events"`
 }
 
 type Config struct {

@@ -87,10 +87,17 @@ func (s *Server) handleEventTrigger(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plugin := s.pluginsManager.Get(event.Handler)
-	if plugin == nil {
-		s.log.Error("plugin not found: %v", event.Handler)
+	constructor := s.pluginsManager.GetConstructor(event.Plugin)
+	if constructor == nil {
+		s.log.Error("plugin constructor not found: %v", event.Plugin)
 		http.Error(w, "plugin not found", http.StatusInternalServerError)
+		return
+	}
+
+	plugin, err := constructor(event.Settings)
+	if err != nil {
+		s.log.Error("failed to create plugin %s: %v", event.Plugin, err)
+		http.Error(w, "failed to create plugin", http.StatusInternalServerError)
 		return
 	}
 

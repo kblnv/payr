@@ -49,22 +49,17 @@ func cmdInit() {
     }
   },
 
-  "handlers": {
+  "events": {
     "hello": {
-      "plugin": "template",
-      "settings": {
-        "template": "Hello, {{ .Name }}!"
+      "transports": ["telegram"],
+      "handler": {
+        "plugin": "template",
+        "settings": {
+          "template": "Hello, {{ .Name }}!"
+        }
       }
     }
-  },
-
-  "events": [
-    {
-      "name": "hello",
-      "transports": ["telegram"],
-      "handler": "hello"
-    }
-  ]
+  }
 }`
 
 	if err := os.WriteFile(DEFAULT_CONFIG_PATH, []byte(config), 0644); err != nil {
@@ -88,19 +83,7 @@ func cmdRun(configPath string) {
 	globalSettings := domain.GetGlobalSettings(config)
 
 	pluginsManager := plugins.New(logger.New().WithPackage("plugins"))
-	pluginsManager.LoadAll(globalSettings.PluginsDir)
-
-	for _, event := range registry.Events {
-		cfg := registry.Handlers[event.Handler]
-
-		constructor := pluginsManager.GetConstructor(cfg.Plugin)
-		instance, err := constructor(cfg.Settings)
-		if err != nil {
-			log.Fatal("failed to create plugin %s: %v", event.Handler, err)
-		}
-
-		pluginsManager.Register(event.Handler, instance)
-	}
+	pluginsManager.LoadAll(globalSettings.Plugins)
 
 	transportsManager := transports.New(logger.New().WithPackage("transports"))
 	transportsManager.RegisterConstructor("telegram", telegram.New)
