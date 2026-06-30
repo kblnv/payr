@@ -23,14 +23,16 @@ type Registry struct {
 }
 
 type GlobalSettings struct {
-	ServerAddress string
-	PluginsDir    string
+	Host       string
+	Port       string
+	PluginsDir string
 }
 
 func GetGlobalSettings(registryDTO *repository.Registry) *GlobalSettings {
 	return &GlobalSettings{
-		ServerAddress: registryDTO.Server.Address,
-		PluginsDir:    registryDTO.PluginsDir,
+		Host:       registryDTO.Server.Host,
+		Port:       registryDTO.Server.Port,
+		PluginsDir: registryDTO.PluginsDir,
 	}
 }
 

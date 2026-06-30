@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	DEFAULT_CONFIG_PATH = "./registry.json"
+	DEFAULT_CONFIG_PATH = "./payr.config.json"
 )
 
 func main() {
@@ -35,36 +35,37 @@ func main() {
 
 func cmdInit() {
 	config := `{
-    "server": {
-      "address": "127.0.0.1:8080"
-    },
+  "server": {
+    "host": "127.0.0.1",
+    "port": "8080"
+  },
 
-    "plugins_dir": "./plugins",
+  "plugins": "./plugins",
 
-    "handlers": {
-      "hello": {
-        "plugin": "template",
-        "settings": {
-          "template": "Hello, {{ .Name }}!"
-        }
+  "transports": {
+    "telegram": {
+      "bot_token": "<bot_token>",
+      "chat_id": "<chat_id>"
+    }
+  },
+
+  "handlers": {
+    "hello": {
+      "plugin": "template",
+      "settings": {
+        "template": "Hello, {{ .Name }}!"
       }
-    },
+    }
+  },
 
-    "transports": {
-      "telegram": {
-        "bot_token": "<bot_token>",
-        "chat_id": "<chat_id>"
-      }
-    },
-
-    "events": [
-      {
-        "name": "hello",
-        "transports": ["telegram"],
-        "handler": "hello"
-      }
-    ]
-  }`
+  "events": [
+    {
+      "name": "hello",
+      "transports": ["telegram"],
+      "handler": "hello"
+    }
+  ]
+}`
 
 	if err := os.WriteFile(DEFAULT_CONFIG_PATH, []byte(config), 0644); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create config: %v\n", err)
@@ -116,7 +117,8 @@ func cmdRun(configPath string) {
 
 	srv := server.New(server.Config{
 		Logger:            logger.New().WithPackage("server"),
-		Address:           globalSettings.ServerAddress,
+		Host:              globalSettings.Host,
+		Port:              globalSettings.Port,
 		Registry:          registry,
 		PluginsManager:    pluginsManager,
 		TransportsManager: transportsManager,

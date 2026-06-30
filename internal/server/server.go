@@ -22,7 +22,8 @@ type Server struct {
 
 type Config struct {
 	Logger            *logger.Logger
-	Address           string
+	Host              string
+	Port              string
 	Registry          *domain.Registry
 	PluginsManager    *plugins.Manager
 	TransportsManager *transports.Transports
@@ -38,7 +39,7 @@ func New(config Config) *Server {
 
 	server := Server{
 		server: &http.Server{
-			Addr:    config.Address,
+			Addr:    config.Host + ":" + config.Port,
 			Handler: mux,
 		},
 		registry:          config.Registry,

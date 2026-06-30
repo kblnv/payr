@@ -19,12 +19,13 @@ type Event struct {
 }
 
 type Server struct {
-	Address string `json:"address"`
+	Host string `json:"host"`
+	Port string `json:"port"`
 }
 
 type Registry struct {
 	Server     Server                     `json:"server"`
-	PluginsDir string                     `json:"plugins_dir"`
+	PluginsDir string                     `json:"plugins"`
 	Handlers   map[string]Handler         `json:"handlers"`
 	Transports map[string]json.RawMessage `json:"transports"`
 	Events     []Event                    `json:"events"`
