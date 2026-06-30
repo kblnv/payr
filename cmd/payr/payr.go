@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-  
+
 	"payr/internal/cmd"
 	"payr/internal/domain"
 	"payr/internal/logger"

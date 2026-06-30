@@ -14,6 +14,7 @@ import (
 type Config struct {
 	Repo     string
 	DataPath string
+	Message  string
 }
 
 type GitHubAPIResponse struct {
@@ -24,6 +25,7 @@ type GitHubAPIResponse struct {
 type GitHubReleases struct {
 	repo      string
 	stateFile string
+	message   string
 }
 
 func New(rawConfig json.RawMessage) (plugins.Plugin, error) {
@@ -42,9 +44,14 @@ func New(rawConfig json.RawMessage) (plugins.Plugin, error) {
 		return nil, fmt.Errorf("dataPath is required")
 	}
 
+	if config.Message == "" {
+		return nil, fmt.Errorf("message is required")
+	}
+
 	return &GitHubReleases{
 		repo:      config.Repo,
 		stateFile: config.DataPath,
+		message:   config.Message,
 	}, nil
 }
 
@@ -76,7 +83,7 @@ func (g *GitHubReleases) Execute(ctx *plugins.Context) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("New release: %s — %s", tag, url), nil
+	return fmt.Sprintf("%s — %s", g.message, url), nil
 }
 
 func (g *GitHubReleases) fetchLatestRelease() (string, string, error) {
